@@ -63,6 +63,7 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 .media-thumb img,.media-thumb video{position:absolute;inset:0;width:100%;height:100%;margin:0;object-fit:cover;border-radius:0}
 .media-thumb span{z-index:1;padding:2px 7px;border-radius:20px;background:#173b61e6;color:white;font-size:13px}
 .media-dialog{padding:15px}.media-dialog img,.media-dialog video{margin:10px auto 0;max-height:65dvh}.media-body{display:grid;gap:14px}
+.progress-filters{display:flex;gap:7px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:8px}.progress-filters button{flex:none}.progress-filters button[aria-pressed=true]{background:var(--accent);color:#fff}.record-actions{grid-column:1/-1;display:flex;justify-content:flex-end;margin-top:10px}.record-actions button{background:transparent;color:#8b352b}
 </style>
 <main>
 <header id="homeHeader"><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1><p class="muted">上冰、训练进展和花销，随手记在一起。</p></header>
@@ -76,7 +77,7 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 <footer><div class="bar"><button id="export" disabled>导出备份</button><button id="import" disabled>导入备份</button><input id="backup" type="file" accept=".json,application/json" hidden></div><small>记录和附件保存在当前浏览器。清理浏览器数据或更换手机前，请先导出备份。备份包含照片和视频，请自行保管。</small></footer>
 </div>
 <section id="expenses" data-view hidden><div class="bar spread"><h2>花销</h2><button class="primary" id="addExpense" disabled>＋ 记一笔</button></div><div id="expenseTotals"></div><div id="expenseList"></div></section>
-<section id="progress" data-view hidden><div class="bar spread"><h2>动作掌握</h2><button class="primary" id="addProgress" disabled>＋ 记录阶段</button></div><div id="progressList"></div></section>
+<section id="progress" data-view hidden><div class="bar spread"><h2>动作掌握</h2><button class="primary" id="addProgress" disabled>＋ 记录阶段</button></div><div class="progress-filters" id="progressFilters" role="group" aria-label="筛选动作分类"></div><p id="noFilteredProgress" class="card muted" hidden>这个分类暂无动作记录。</p><div id="progressList"></div></section>
 <section id="ice" data-view hidden><div class="bar spread"><h2>冰时总览</h2></div>
 <div class="card"><div class="bar spread"><button id="prevMonth" aria-label="上个月">‹</button><h2 id="calendarTitle" class="cal-title"></h2><button id="nextMonth" aria-label="下个月">›</button></div><p id="calendarTotal"></p><div class="calendar" id="calendar"></div></div><div id="dayDetails"></div></section>
 
@@ -97,7 +98,7 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 const byId=id=>document.getElementById(id), form=byId('form'), editor=byId('editor');
 const MAX=20*1024*1024;
 let db, records=[], extras=[], editing=null, attachments=[], urls=[];
-let detailType, detailId, detailFiles=[];
+let detailType, detailId, detailSource, detailFiles=[];
 let calendarMonth=new Date(), selectedDay;
 const detailForm=byId('detailForm'), detailEditor=byId('detailEditor');
 const feeCategories=['场地费','月卡','年卡','其他冰场卡','教练费','装备费','考级费','其他','历史训练费'];
@@ -152,7 +153,7 @@ function render(){
   card.append(top,make('p',r.kind+' · '+duration(r.minutes)+' · '+money(Math.round((r.cost+(r.coachFee??0)+(r.legacyFee??0))*100))+(r.kind==='教练课'&&r.coach?' · 教练 '+r.coach:'')+(paymentLabels[r.payment]?' · '+paymentLabels[r.payment]:''),'muted'));
   for(const [name,level] of moveList(r.moves)){card.append(make('span',name+' · '+level,'chip'));}
   if(r.notes)card.append(make('p',r.notes));
-  const remove=make('button','删除');remove.onclick=async()=>{if(!confirm('删除这条训练记录和其中的附件？'))return;try{await transact('readwrite',store=>store.delete(r.id));await refresh();say('已删除记录。');}catch{say('删除失败，请重试。');}};card.append(remove);appendMedia(card,r.files);list.append(card);
+  const remove=make('button','删除');remove.onclick=async()=>{if(!confirm('删除这条训练记录和其中的附件？'))return;try{await transact('readwrite',store=>store.delete(r.id));await refresh();say('已删除记录。');}catch{say('删除失败，请重试。');}};appendMedia(card,r.files);const actions=make('div',undefined,'record-actions');actions.append(remove);card.append(actions);list.append(card);
  }
  const panel=byId('skills');panel.replaceChildren();
  const groups=progressGroups();
@@ -282,26 +283,42 @@ function renderExpenses(){
 }
 function progressGroups(){
  const groups=new Map();
- const categorized=new Map();
+ const categorized=new Map(), linked=new Map(), sourceMoves=new Map(records.map(log=>[log.id,moveList(log.moves)]));
+ const sourceKey=(logId,label)=>JSON.stringify([logId,label]);
  function add(name,category,stage){
   const key=JSON.stringify([category,name]);
   if(!groups.has(key))groups.set(key,{name,category,stages:[]});
   groups.get(key).stages.push(stage);
  }
  for(const stage of extras)if(stage.type==='progress'){
+  if(stage.sourceLogId&&sourceMoves.get(stage.sourceLogId)?.some(([label])=>label===stage.sourceMove)){linked.set(sourceKey(stage.sourceLogId,stage.sourceMove),stage);continue;}
   const category=moveCategories.includes(stage.moveGroup)?stage.moveGroup:'未分类';
   if(category!=='未分类'&&!categorized.has(stage.name))categorized.set(stage.name,category);
   add(stage.name,category,stage);
  }
- for(const log of records)if(log.includeMoves!==false)for(const [label,level] of moveList(log.moves)){
+ for(const log of records)if(log.includeMoves!==false)for(const [label,level] of new Map(sourceMoves.get(log.id))){
   const prefix=label.match(/^(跳跃|旋转|步法|整活)\s*[\/／]\s*(.+)$/);
   const name=prefix?prefix[2].trim():label;
   const defaultCategory=moveCategories.includes(log.moveCategory)?log.moveCategory:'未分类';
   const category=prefix?.[1]??(defaultCategory==='未分类'?categorized.get(name)??defaultCategory:defaultCategory);
-  add(name,category,{date:log.date,updated:log.updated,level,log});
+  const saved=linked.get(sourceKey(log.id,label));
+  add(name,category,{...saved,date:log.date,updated:saved?.updated??log.updated,level:saved?.level??level,log,sourceMove:label});
  }
  for(const group of groups.values())group.stages.sort((a,b)=>b.date.localeCompare(a.date)||b.updated-a.updated);
  return groups;
+}
+let progressFilter='全部';
+const filterBar=byId('progressFilters');
+const filterOptions=['全部',...moveCategories.filter(c=>c!=='未分类')];
+for(const category of filterOptions){
+ const button=actionButton(category,()=>{progressFilter=category;applyProgressFilter();});
+ button.dataset.filter=category;filterBar.append(button);
+}
+function applyProgressFilter(){
+ for(const button of filterBar.children)button.setAttribute('aria-pressed',String(button.dataset.filter===progressFilter));
+ const sections=[...byId('progressList').querySelectorAll('[data-move-category]')];
+ for(const section of sections)section.hidden=section.children.length<2||(progressFilter!=='全部'&&section.dataset.moveCategory!==progressFilter);
+ byId('noFilteredProgress').hidden=progressFilter==='全部'||sections.some(section=>!section.hidden);
 }
 function renderProgress(){
  const list=byId('progressList'), names=byId('moveNames');list.replaceChildren();names.replaceChildren();
@@ -309,7 +326,7 @@ function renderProgress(){
  if(!groups.size)list.append(make('p','暂无动作进度。添加阶段后，可按时间回看练习记录。','card muted'));
  const sections=new Map();
  for(const category of moveCategories){
-  const section=make('section');section.append(make('h2',category));section.hidden=true;sections.set(category,section);list.append(section);
+  const section=make('section');section.append(make('h2',category));section.dataset.moveCategory=category;sections.set(category,section);list.append(section);
  }
  const suggestions=new Set();
  for(const {name,category,stages} of groups.values()){
@@ -321,12 +338,18 @@ function renderProgress(){
   for(const stage of stages){
    const item=make('article');
    item.append(make('strong',stage.level),make('p',stage.date+(stage.log?' · 来自训练日志':''),'muted'));
-   if(stage.log){item.append(actionButton('查看训练',()=>show(stage.log)));appendMedia(item,stage.log.files);}
+   if(stage.log){
+    if(stage.notes)item.append(make('p',stage.notes));
+    const actions=make('div',undefined,'bar');
+    actions.append(actionButton('查看训练',()=>show(stage.log)),actionButton(stage.id?'编辑动作阶段':'添加动作照片或视频',()=>showDetail('progress',{...stage,name,moveGroup:category,sourceLogId:stage.log.id})));
+    item.append(actions);appendMedia(item,stage.files??[]);
+   }
    else{if(stage.notes)item.append(make('p',stage.notes));appendDetailActions(item,stage);appendMedia(item,stage.files);}
    timeline.append(item);
   }
-  card.append(timeline);const section=sections.get(category);section.hidden=false;section.append(card);
+  card.append(timeline);const section=sections.get(category);section.append(card);
  }
+ applyProgressFilter();
 }
 function appendDetailActions(parent,record){
  const actions=make('div',undefined,'bar');
@@ -390,9 +413,11 @@ function listDetailFiles(){
 }
 function showDetail(type,record,name='',category='跳跃'){
  detailType=type;detailId=record?.id??null;detailFiles=[...(record?.files??[])];detailForm.reset();
+ detailSource=record?.log?{sourceLogId:record.sourceLogId,sourceMove:record.sourceMove,name:record.name,moveGroup:record.moveGroup,date:record.date}:null;
  const f=detailForm.elements, expense=type==='expense';
  byId('expenseFields').disabled=byId('expenseFields').hidden=!expense;
  byId('progressFields').disabled=byId('progressFields').hidden=expense;
+ f.date.readOnly=!!detailSource;f.name.readOnly=!!detailSource;f.moveGroup.disabled=!!detailSource;
  f.date.value=record?.date??dateToday();f.notes.value=record?.notes??'';
  if(expense){f.category.value=record?.category??'场地费';f.amount.value=record?record.cents/100:'';}
  else{
@@ -415,10 +440,12 @@ detailForm.onsubmit=async event=>{
  event.preventDefault();
  const button=byId('detailSave');if(button.disabled)return;
  const fields=Object.fromEntries(new FormData(detailForm));
- const record={id:detailId||newId(),type:detailType,date:fields.date,notes:fields.notes,updated:Date.now(),files:[]};
+ const record={id:detailId||(detailSource?'linked:'+JSON.stringify([detailSource.sourceLogId,detailSource.sourceMove]):newId()),type:detailType,date:fields.date,notes:fields.notes,updated:Date.now(),files:[]};
  if(detailType==='expense'){record.category=fields.category;record.cents=Math.round(Number(fields.amount)*100);}
  else{
-  record.name=fields.name.trim();record.moveGroup=fields.moveGroup;record.level=(fields.customLevel??fields.level).trim();record.files=[...detailFiles];
+  record.name=fields.name.trim();record.moveGroup=fields.moveGroup;
+  if(detailSource)Object.assign(record,detailSource);
+  record.level=(fields.customLevel??fields.level).trim();record.files=[...detailFiles];
   if(!record.name||!record.level){byId('detailStatus').textContent='请填写动作名称和阶段。';return;}
  }
  button.disabled=true;
