@@ -1,3 +1,4 @@
+Passed legacy backup, fee totals, stage ordering, duration and invalid backup checks.
 <!doctype html>
 <html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>冰迹 · 花滑日志</title>
 <style>
@@ -72,9 +73,10 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 @media(max-width:600px){.training-fields>label{font-size:14px}.training-card.with-media .media-rail{width:clamp(57px,17vw,80px)}}
 .openable{cursor:pointer}.openable:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.openable:hover{border-color:#a7c4e3}.move-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center;margin-bottom:8px}.move-row input,.move-row select{margin:0}.move-row button{padding-inline:7px}.move-row .remove-move{background:transparent;color:#8b352b}.stage-row{border-radius:8px}.stage-row:hover{background:var(--paper)}
 @media(max-width:600px){html{zoom:.75}}
-.move-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.move-row .move-name{grid-column:1/-1}.move-row select{min-width:0;padding-inline:6px}
+.move-row{grid-template-columns:minmax(0,1.3fr) minmax(0,.85fr) minmax(0,1.25fr) auto}.move-row select{min-width:0;padding-inline:4px}.move-row input{padding-inline:5px}
 dialog button.dialog-save-top[type=submit]{width:auto;flex:none}
-.payment-options{min-width:0}.payment-options summary{cursor:pointer;min-height:44px;padding:9px 0;color:var(--accent);overflow-wrap:anywhere;font-size:14px}.payment-options label{font-size:14px}.pass-markers{display:flex;justify-content:center;gap:2px;margin-top:3px}.pass-marker{height:3px;width:9px;border-radius:4px;background:#2b71b5}.pass-marker.quarter{background:#835ba6}.pass-marker.year{background:#27806a}.pass-legend:not(:empty){display:grid;gap:5px;margin-top:12px}.pass-key{display:flex;align-items:center;gap:7px}.pass-key .pass-marker{flex:none}
+.pass-markers{display:flex;justify-content:center;gap:2px;margin-top:3px}.pass-marker{height:3px;width:9px;border-radius:4px;background:#2b71b5}.pass-marker.quarter{background:#835ba6}.pass-marker.year{background:#27806a}.pass-legend:not(:empty){display:grid;gap:5px;margin-top:12px}.pass-key{display:flex;align-items:center;gap:7px}.pass-key .pass-marker{flex:none}
+.training-group{border-top:1px solid var(--line);padding-top:4px;margin-bottom:8px}.training-group legend{padding-right:7px;margin-bottom:2px;font-size:14px}.training-trio{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.training-trio>label:first-child:last-of-type,.training-trio:not(:has(>label:not(:first-child):not([hidden])))>label:first-child{grid-column:1/-1}.training-trio input,.training-trio select{padding-inline:6px}.payment-toggle{display:block;background:transparent;color:var(--accent);min-height:38px;padding:4px 0;font-size:14px}.payment-toggle::before{content:'▸';margin-right:5px}.payment-toggle[aria-expanded=true]::before{content:'▾'}
 </style>
 <main>
 <header id="homeHeader"><div class="home-heading"><div><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1></div><button type="button" class="avatar" id="profileButton" aria-label="编辑头像和昵称">＋</button></div><p class="muted">上冰、训练和花销，随手记在一起。</p></header>
@@ -101,7 +103,13 @@ dialog button.dialog-save-top[type=submit]{width:auto;flex:none}
 
 </main>
 <dialog id="editor"><form id="form"><div class="bar spread"><h2 id="editorTitle">记一次上冰</h2><button type="submit" class="primary dialog-save-top" id="saveTop">保存</button></div>
-<div class="grid training-fields"><label>日期<input name="date" type="date" required></label><label>冰时（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><details class="payment-options" id="paymentOptions"><summary id="paymentSummary">场地结算</summary><label>结算方式<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="quarter">季卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label></details><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div>
+<div class="grid training-fields"><label>日期<input name="date" type="date" required></label><label>冰时（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label></div>
+<fieldset class="training-group"><legend>冰场费用</legend>
+<button type="button" id="paymentSummary" class="payment-toggle" aria-expanded="false" aria-controls="venueTrainingRow">场地结算</button>
+<div id="venueTrainingRow" class="grid training-fields training-trio"><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><label id="paymentMethodLabel">结算方式<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="quarter">季卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label></div>
+<label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></fieldset>
+<fieldset class="training-group"><legend>训练与教练</legend>
+<div class="grid training-fields training-trio"><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div></fieldset>
 <label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><fieldset><legend>练习动作及掌握程度</legend><div id="trainingMoves"></div><button type="button" id="addTrainingMove">＋ 添加动作</button></fieldset>
 
 <label>备注<textarea name="notes" rows="2" maxlength="5000"></textarea></label>
@@ -137,7 +145,7 @@ function addTrainingMove(label='',level='练习中'){
  select.setAttribute('aria-label','掌握程度');
  for(const value of new Set([...trainingLevels,level]))select.append(make('option',value));
  select.value=level;
- const remove=actionButton('移除',()=>row.remove());remove.className='remove-move';row.append(input,category,select,remove);
+ const remove=actionButton('×',()=>row.remove());remove.setAttribute('aria-label','移除动作');remove.className='remove-move';row.append(input,category,select,remove);
  row.dataset.original=label;trainingMoves.append(row);
  return input;
 }
@@ -211,15 +219,23 @@ function updateCoach(){
  form.elements.coachFee.disabled=!lesson;
 }
 form.elements.kind.onchange=updateCoach;
+let paymentExpanded=false;
 function updatePayment(){
  const payment=form.elements.payment.value, single=payment==='single';
- byId('paymentSummary').textContent='场地结算 · '+(paymentLabels[payment]??paymentLabels.single);
- byId('rinkFeeLabel').hidden=!single;form.elements.cost.disabled=!single;
+ const toggle=byId('paymentSummary');
+ toggle.textContent='场地结算 · '+(paymentLabels[payment]??paymentLabels.single);
+ toggle.setAttribute('aria-expanded',String(paymentExpanded));
+ byId('paymentMethodLabel').hidden=!paymentExpanded;
+ byId('rinkFeeLabel').hidden=!paymentExpanded||!single;
+ form.elements.cost.disabled=!single;
 }
+function expandPayment(expanded){paymentExpanded=expanded;updatePayment();}
+byId('paymentSummary').onclick=()=>expandPayment(!paymentExpanded);
 form.elements.payment.onchange=updatePayment;
 form.elements.rink.onchange=()=>{
- if(form.elements.rink.value.trim()!==previousRink)byId('paymentOptions').open=true;
+ if(form.elements.rink.value.trim()!==previousRink)expandPayment(true);
 };
+
 const dateToday=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 const make=(tag,value,className)=>{const node=document.createElement(tag); if(value!==undefined)node.textContent=value;if(className)node.className=className;return node};
 function openDB(){return new Promise((resolve,reject)=>{const request=indexedDB.open('ice-practice-journal',1);request.onupgradeneeded=()=>request.result.createObjectStore('logs',{keyPath:'id'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);request.onblocked=()=>reject(Error('数据库正在被其他页面使用'));});}
@@ -274,7 +290,7 @@ function show(record){editing=record?.id??null;attachments=[...(record?.files??[
  previousRink=last?.rink?.trim()??'';
  if(!record)form.elements.rink.value=last?.rink??'';
  form.elements.payment.value=last?.payment??'single';
- byId('paymentOptions').open=!last;updatePayment();
+ expandPayment(!last);
  form.elements.includeMoves.checked=record?.includeMoves!==false;
  trainingDefaultCategory=moveCategories.includes(record?.moveCategory)?record.moveCategory:'未分类';
  trainingMoves.replaceChildren();
