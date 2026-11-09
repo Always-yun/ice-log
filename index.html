@@ -70,9 +70,10 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 .hero-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px}.hero-heading h2{margin:0}.skate-sticker{width:92px;height:58px;flex:none;overflow:visible}.stats .tracked{font-size:11px;color:#c6ddf5}.stats button:focus-visible{outline-color:#d2e7ff}.mastered-help{margin:0 0 12px;font-size:14px}
 .training-fields{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:10px 9px;margin-bottom:12px}.training-fields>label{min-width:0;margin:0}.training-fields input,.training-fields select{max-width:100%}.training-fields input[type=date]{display:block;min-inline-size:0;inline-size:100%;padding-inline:7px}.training-fields input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0;min-width:0}.record-top{margin-bottom:3px}.training-card.with-media{row-gap:4px}.training-card .record-footer{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 0}.record-footer .record-summary{margin:0;font-size:14px;white-space:nowrap}.record-footer button{flex:none;padding:5px 8px;background:transparent;color:#8b352b}.attachment-picker{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 8px}.file-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-bottom:6px}.file-row span{overflow-wrap:anywhere;font-size:14px}
 @media(max-width:600px){.training-fields>label{font-size:14px}.training-card.with-media .media-rail{width:clamp(57px,17vw,80px)}}
+.openable{cursor:pointer}.openable:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.openable:hover{border-color:#a7c4e3}.move-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center;margin-bottom:8px}.move-row input,.move-row select{margin:0}.move-row button{padding-inline:7px}.move-row .remove-move{background:transparent;color:#8b352b}.stage-row{border-radius:8px}.stage-row:hover{background:var(--paper)}
 </style>
 <main>
-<header id="homeHeader"><div class="home-heading"><div><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1></div><button type="button" class="avatar" id="profileButton" aria-label="编辑头像和昵称">＋</button></div><p class="muted">上冰、训练进展和花销，随手记在一起。</p></header>
+<header id="homeHeader"><div class="home-heading"><div><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1></div><button type="button" class="avatar" id="profileButton" aria-label="编辑头像和昵称">＋</button></div><p class="muted">上冰、训练和花销，随手记在一起。</p></header>
 <nav aria-label="主导航"><button data-page="home" aria-current="page" class="primary">首页</button><button data-page="progress">动作</button><button data-page="ice">冰时</button><button data-page="expenses">花销</button></nav>
 <div id="status" role="status"></div>
 <div id="home" data-view>
@@ -97,7 +98,8 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 </main>
 <dialog id="editor"><form id="form"><div class="bar spread"><h2 id="editorTitle">记一次上冰</h2><button type="button" id="close">关闭</button></div>
 <div class="grid training-fields"><label>日期<input name="date" type="date" required></label><label>冰时（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><label>场地结算<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div>
-<label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><label id="moveCategoryLabel">默认动作分类<select name="moveCategory"><option>未分类</option><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>其他</option></select></label><label>练习动作及掌握程度 <small>每行一个，用「动作：程度」记录。例如「跳跃 / 华尔兹跳：第一次掌握」会计入已掌握</small><textarea name="moves" rows="3" maxlength="2000" placeholder="后外点冰跳：练习中&#10;燕式滑行：已掌握"></textarea></label>
+<label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><label id="moveCategoryLabel">默认动作分类<select name="moveCategory"><option>未分类</option><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>其他</option></select></label><fieldset><legend>练习动作及掌握程度</legend><div id="trainingMoves"></div><button type="button" id="addTrainingMove">＋ 添加动作</button></fieldset>
+
 <label>训练笔记 / 教练反馈<textarea name="notes" rows="3" maxlength="5000"></textarea></label>
 <div class="attachment-picker"><button type="button" data-pick-file="trainingFiles">添加照片或视频</button><small>每条最多 5 个，单个 20 MB</small><input id="trainingFiles" name="files" type="file" multiple accept="image/*,video/*" hidden></div><div id="attached"></div>
 <div id="formStatus" role="status"></div><button class="primary" id="save">保存记录</button></form></dialog>
@@ -111,6 +113,25 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 <script>
 const byId=id=>document.getElementById(id), form=byId('form'), editor=byId('editor');
 const MAX=20*1024*1024;
+const trainingLevels=['练习中','第一次掌握','逐渐熟练','稳定完成'];
+const trainingMoves=byId('trainingMoves');
+function addTrainingMove(name='',level='练习中'){
+ const row=make('div',undefined,'move-row'), input=make('input'), select=make('select');
+ input.placeholder='动作名称';input.value=name;input.maxLength=Math.max(100,name.length);input.setAttribute('aria-label','动作名称');
+ select.setAttribute('aria-label','掌握程度');
+ for(const value of new Set([...trainingLevels,level]))select.append(make('option',value));
+ select.value=level;
+ const remove=actionButton('移除',()=>row.remove());remove.className='remove-move';row.append(input,select,remove);
+ trainingMoves.append(row);
+ return input;
+}
+byId('addTrainingMove').onclick=()=>addTrainingMove().focus();
+function readTrainingMoves(){
+ return [...trainingMoves.children].map(row=>{
+  const [name,level]=row.children;
+  return name.value.trim()?[name.value.trim(),level.value].join('：'):'';
+ }).filter(Boolean).join('\n');
+}
 document.querySelectorAll('[data-pick-file]').forEach(button=>{
  button.onclick=()=>byId(button.dataset.pickFile).click();
 });
@@ -165,14 +186,15 @@ function render(){
  if(!records.length)list.append(make('p','暂无训练记录。点击「记一次上冰」添加。','card muted'));
  for(const r of records){
   const card=make('article',undefined,'card training-card'), top=make('div',undefined,'record-top');
-  const title=actionButton(r.date+(r.rink?' · '+r.rink:''),()=>show(r));
-  title.className='record-title';title.setAttribute('aria-label','编辑 '+title.textContent+' 的训练记录');
-  top.append(title);
-  card.onclick=event=>{if(!event.target.closest('button,a,input,video'))show(r);};
+  top.append(make('strong',r.date+(r.rink?' · '+r.rink:'')));
+  openCard(card,'训练记录 '+r.date,()=>show(r));
   card.append(top);
   for(const [name,level] of moveList(r.moves)){card.append(make('span',name+' · '+level,'chip'));}
   if(r.notes)card.append(make('p',r.notes));
-  const remove=make('button','删除');remove.onclick=async()=>{if(!confirm('删除这条训练记录和其中的附件？'))return;try{await transact('readwrite',store=>store.delete(r.id));await refresh();say('已删除记录。');}catch{say('删除失败，请重试。');}};appendMedia(card,r.files);const footer=make('div',undefined,'record-footer');footer.append(make('p',r.kind+' · '+duration(r.minutes),'record-summary muted'),remove);card.append(footer);list.append(card);
+  appendMedia(card,r.files);
+  const footer=make('div',undefined,'record-footer');
+  footer.append(make('p',r.kind+' · '+duration(r.minutes),'record-summary muted'),trainingDelete(r));
+  card.append(footer);list.append(card);
  }
  const panel=byId('skills');panel.replaceChildren();
  const groups=progressGroups(true);
@@ -183,7 +205,7 @@ function render(){
  renderExpenses();renderProgress();renderCalendar();
 }
 function listAttachments(){const panel=byId('attached');panel.replaceChildren();attachments.forEach((file,index)=>{const row=make('div',undefined,'file-row');row.append(make('span',file.name));const remove=make('button','移除');remove.type='button';remove.onclick=()=>{attachments.splice(index,1);listAttachments();};row.append(remove);panel.append(row);});}
-function show(record){editing=record?.id??null;attachments=[...(record?.files??[])];form.reset();form.elements.date.value=dateToday();for(const key of ['date','rink','cost','kind','coach','moves','notes'])if(record)form.elements[key].value=record[key];byId('editorTitle').textContent=record?'编辑训练':'记一次上冰';byId('formStatus').textContent='';form.elements.coachFee.value=record?.coachFee??'';
+function show(record){editing=record?.id??null;attachments=[...(record?.files??[])];form.reset();form.elements.date.value=dateToday();for(const key of ['date','rink','cost','kind','coach','notes'])if(record)form.elements[key].value=record[key];byId('editorTitle').textContent=record?'编辑训练':'记一次上冰';byId('formStatus').textContent='';form.elements.coachFee.value=record?.coachFee??'';
  const legacy=record?.legacyFee??(record&&record.coachFee===undefined?record.cost:0);
  if(record&&record.coachFee===undefined)form.elements.cost.value='';
  byId('legacyFeeLabel').hidden=!legacy;form.elements.legacyFee.disabled=!legacy;form.elements.legacyFee.value=legacy||'';
@@ -191,6 +213,10 @@ function show(record){editing=record?.id??null;attachments=[...(record?.files??[
  form.elements.payment.value=record?.payment??'single';updatePayment();
  form.elements.includeMoves.checked=record?.includeMoves!==false;
  form.elements.moveCategory.value=record?.moveCategory??'未分类';updateMoveInclusion();
+ trainingMoves.replaceChildren();
+ const moves=moveList(record?.moves??'');
+ if(moves.length)for(const [name,level] of moves)addTrainingMove(name,level);
+ else addTrainingMove();
  listAttachments();editor.showModal();}
 byId('add').onclick=()=>show();byId('close').onclick=()=>editor.close();
 form.elements.files.onchange=()=>{const files=[...form.elements.files.files];form.elements.files.value='';if(files.length+attachments.length>5||files.some(f=>!validMedia(f))){byId('formStatus').textContent='请选择图片或视频，每个最多 20 MB，每条最多 5 个。';return;}attachments.push(...files);byId('formStatus').textContent='';listAttachments();};
@@ -199,7 +225,8 @@ form.onsubmit=async event=>{event.preventDefault();const save=byId('save');if(sa
  const fields=Object.fromEntries(new FormData(form));
  const minutes=Math.round(Number(fields.hours)*60);
  if(!Number.isInteger(minutes)||minutes<1||minutes>1440){byId('formStatus').textContent='请填写 1 分钟到 24 小时之间的冰时。';return;}
- const {date,rink,kind,coach='',moves,notes}=fields;
+ const {date,rink,kind,coach='',notes}=fields;
+ const moves=readTrainingMoves();
  const record={id:editing||newId(),date,rink,kind,coach,moves,notes,minutes,payment:fields.payment,includeMoves:form.elements.includeMoves.checked,moveCategory:fields.moveCategory,cost:Number(fields.cost||0),coachFee:Number(fields.coachFee||0),legacyFee:Number(fields.legacyFee||0),updated:Date.now(),files:[...attachments]};
  await transact('readwrite',store=>store.put(record));editor.close();await refresh();say('已保存',true);
  }catch{byId('formStatus').textContent='保存失败。请检查浏览器存储空间，或减少附件后重试。';}finally{save.disabled=false;}};
@@ -270,6 +297,32 @@ function appendMedia(parent,files){
  }
  parent.classList.add('with-media');parent.append(copy,rail);
 }
+function openCard(card,label,handler){
+ card.classList.add('openable');card.tabIndex=0;card.setAttribute('aria-label',label);
+ card.onclick=event=>{
+  if(event.target.closest('button,a,input,video'))return;
+  event.stopPropagation();handler();
+ };
+ card.onkeydown=event=>{
+  if(event.target===card&&['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();handler();}
+ };
+}
+function appendDelete(parent,button){
+ const actions=make('div',undefined,'record-actions');actions.append(button);parent.append(actions);
+}
+function deleteButton(prompt,remove){
+ const button=actionButton('删除',async()=>{
+  if(!confirm(prompt))return;
+  button.disabled=true;
+  try{await transact('readwrite',remove);await refresh();say('已删除',true);}
+  catch{say('删除失败，请重试。');}
+  finally{button.disabled=false;}
+ });
+ return button;
+}
+function trainingDelete(log){
+ return deleteButton('删除这条训练记录和其中的附件？',store=>store.delete(log.id));
+}
 function actionButton(label,handler){
  const button=make('button',label);button.type='button';button.onclick=handler;return button;
 }
@@ -299,8 +352,17 @@ function renderExpenses(){
   const card=make('article',undefined,'card'), top=make('div',undefined,'bar spread');
   top.append(make('strong',row.category),make('strong',money(row.cents),'amount'));
   card.append(top,make('p',row.date+(row.log?' · 来自训练日志':'')+(row.notes?' · '+row.notes:''),'muted'));
-  if(row.log)card.append(actionButton('编辑训练',()=>show(row.log)));
-  else appendDetailActions(card,row.entry);
+  if(row.log){
+   openCard(card,'花销 '+row.category+' '+row.date,()=>show(row.log));
+   const field=row.category==='教练费'?'coachFee':row.category==='历史训练费'&&row.log.coachFee!==undefined?'legacyFee':'cost';
+   appendDelete(card,deleteButton('删除这笔花销？训练记录会保留。',store=>{
+    const request=store.get(row.log.id);
+    request.onsuccess=()=>{if(request.result)store.put({...request.result,[field]:0,updated:Date.now()});};
+   }));
+  }else{
+   openCard(card,'花销 '+row.category+' '+row.date,()=>showDetail('expense',row.entry));
+   appendDelete(card,deleteButton('删除这笔花销？',store=>store.delete(row.entry.id)));
+  }
   list.append(card);
  }
 }
@@ -363,19 +425,18 @@ function renderProgress(){
  for(const {name,category,stages} of groups.values()){
   if(!suggestions.has(name)){suggestions.add(name);const option=make('option');option.value=name;names.append(option);}
   const card=make('section',undefined,'card'), head=make('div',undefined,'bar spread');
+  const editStage=stage=>showDetail('progress',stage.log?{...stage,name,moveGroup:category,sourceLogId:stage.log.id}:stage);
+  openCard(card,'动作 '+name,()=>editStage(stages[0]));
   head.append(make('h3',name),actionButton('＋ 新阶段',()=>showDetail('progress',null,name,category)));
   card.append(head,make('span','最近 · '+stages[0].level+' · '+stages.length+' 条记录','chip'));
   const timeline=make('div',undefined,'timeline');
   for(const stage of stages){
-   const item=make('article');
+   const item=make('article',undefined,'stage-row');
+   openCard(item,name+' '+stage.level+' '+stage.date,()=>editStage(stage));
    item.append(make('strong',stage.level),make('p',stage.date+(stage.log?' · 来自训练日志':''),'muted'));
-   if(stage.log){
-    if(stage.notes)item.append(make('p',stage.notes));
-    const actions=make('div',undefined,'bar');
-    actions.append(actionButton('查看训练',()=>show(stage.log)),actionButton(stage.id?'编辑动作阶段':'添加动作照片或视频',()=>showDetail('progress',{...stage,name,moveGroup:category,sourceLogId:stage.log.id})));
-    item.append(actions);appendMedia(item,stage.files??[]);
-   }
-   else{if(stage.notes)item.append(make('p',stage.notes));appendDetailActions(item,stage);appendMedia(item,stage.files);}
+   if(stage.notes)item.append(make('p',stage.notes));
+   appendMedia(item,stage.files??[]);
+   if(!stage.log)appendDelete(item,deleteButton('删除这个动作阶段及其附件？',store=>store.delete(stage.id)));
    timeline.append(item);
   }
   const actions=make('div',undefined,'record-actions');
@@ -404,15 +465,6 @@ async function deleteProgressCard(name,category,stages,button){
  }catch{say('删除失败，请重试。');}
  finally{button.disabled=false;}
 }
-function appendDetailActions(parent,record){
- const actions=make('div',undefined,'bar');
- actions.append(actionButton('编辑',()=>showDetail(record.type,record)),actionButton('删除',async()=>{
-  if(!confirm('删除这条记录及其附件？'))return;
-  try{await transact('readwrite',store=>store.delete(record.id));await refresh();say('已删除记录。');}
-  catch{say('删除失败，请重试。');}
- }));
- parent.append(actions);
-}
 const dateKey=(year,month,day)=>String(year).padStart(4,'0')+'-'+String(month+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
 function renderCalendar(){
  const year=calendarMonth.getFullYear(), month=calendarMonth.getMonth(), prefix=dateKey(year,month,1).slice(0,7), today=dateToday();
@@ -432,14 +484,17 @@ function renderCalendar(){
   if(sessions.length){button.classList.add('has-ice');button.append(make('small',duration(totalMinutes(sessions))));}
   grid.append(button);
  }
- const details=byId('dayDetails'), card=make('div',undefined,'card'), sessions=byDay.get(selectedDay)??[];
- card.append(make('h2',selectedDay));
- if(!sessions.length)card.append(make('p','这天没有上冰记录。','muted'));
+ const details=byId('dayDetails'), sessions=byDay.get(selectedDay)??[];
+ details.replaceChildren(make('h2',selectedDay));
+ if(!sessions.length)details.append(make('p','这天没有上冰记录。','card muted'));
  for(const log of sessions){
-  const line=make('div',undefined,'bar spread');
-  line.append(make('span',[log.rink,log.kind,duration(log.minutes)].filter(Boolean).join(' · ')),actionButton('查看记录',()=>show(log)));card.append(line);
+  const card=make('article',undefined,'card');
+  openCard(card,'训练记录 '+log.date+' '+log.rink,()=>show(log));
+  if(log.rink)card.append(make('strong',log.rink));
+  const footer=make('div',undefined,'record-footer');
+  footer.append(make('p',log.kind+' · '+duration(log.minutes),'record-summary muted'),trainingDelete(log));
+  card.append(footer);details.append(card);
  }
- details.replaceChildren(card);
 }
 byId('prevMonth').onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);renderCalendar();};
 byId('nextMonth').onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);renderCalendar();};
