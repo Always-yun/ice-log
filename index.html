@@ -73,7 +73,8 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 .openable{cursor:pointer}.openable:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.openable:hover{border-color:#a7c4e3}.move-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center;margin-bottom:8px}.move-row input,.move-row select{margin:0}.move-row button{padding-inline:7px}.move-row .remove-move{background:transparent;color:#8b352b}.stage-row{border-radius:8px}.stage-row:hover{background:var(--paper)}
 @media(max-width:600px){html{zoom:.75}}
 .move-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.move-row .move-name{grid-column:1/-1}.move-row select{min-width:0;padding-inline:6px}
-dialog .dialog-save-top{width:auto}
+dialog button.dialog-save-top[type=submit]{width:auto;flex:none}
+.payment-options{min-width:0}.payment-options summary{cursor:pointer;min-height:44px;padding:9px 0;color:var(--accent);overflow-wrap:anywhere;font-size:14px}.payment-options label{font-size:14px}.pass-markers{display:flex;justify-content:center;gap:2px;margin-top:3px}.pass-marker{height:3px;width:9px;border-radius:4px;background:#2b71b5}.pass-marker.quarter{background:#835ba6}.pass-marker.year{background:#27806a}.pass-legend:not(:empty){display:grid;gap:5px;margin-top:12px}.pass-key{display:flex;align-items:center;gap:7px}.pass-key .pass-marker{flex:none}
 </style>
 <main>
 <header id="homeHeader"><div class="home-heading"><div><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1></div><button type="button" class="avatar" id="profileButton" aria-label="编辑头像和昵称">＋</button></div><p class="muted">上冰、训练和花销，随手记在一起。</p></header>
@@ -96,11 +97,11 @@ dialog .dialog-save-top{width:auto}
 <section id="expenses" data-view hidden><div class="bar spread"><h2>花销</h2><button class="primary" id="addExpense" disabled>＋ 记一笔</button></div><div id="expenseTotals"></div><div id="expenseList"></div></section>
 <section id="progress" data-view hidden><div class="bar spread"><h2>动作掌握</h2><button class="primary" id="addProgress" disabled>＋ 记一个</button></div><p class="muted mastered-help">纳入动作掌握的训练会计入「已记录」。将动作阶段设为「第一次掌握」或更高，才会计入「已掌握」。</p><div class="progress-filters" id="progressFilters" role="group" aria-label="筛选动作分类"></div><p id="noFilteredProgress" class="card muted" hidden>这个分类暂无动作记录。</p><div id="progressList"></div></section>
 <section id="ice" data-view hidden><div class="bar spread"><h2>冰时总览</h2><button class="primary" id="addIce" disabled>＋ 记一刻</button></div>
-<div class="card"><div class="bar spread"><button id="prevMonth" aria-label="上个月">‹</button><h2 id="calendarTitle" class="cal-title"></h2><button id="nextMonth" aria-label="下个月">›</button></div><p id="calendarTotal"></p><div class="calendar" id="calendar"></div></div><div id="dayDetails"></div></section>
+<div class="card"><div class="bar spread"><button id="prevMonth" aria-label="上个月">‹</button><h2 id="calendarTitle" class="cal-title"></h2><button id="nextMonth" aria-label="下个月">›</button></div><p id="calendarTotal"></p><div class="calendar" id="calendar"></div><div class="pass-legend" id="passLegend"></div></div><div id="dayDetails"></div></section>
 
 </main>
 <dialog id="editor"><form id="form"><div class="bar spread"><h2 id="editorTitle">记一次上冰</h2><button type="submit" class="primary dialog-save-top" id="saveTop">保存</button></div>
-<div class="grid training-fields"><label>日期<input name="date" type="date" required></label><label>冰时（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><label>场地结算<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div>
+<div class="grid training-fields"><label>日期<input name="date" type="date" required></label><label>冰时（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><details class="payment-options" id="paymentOptions"><summary id="paymentSummary">场地结算</summary><label>结算方式<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="quarter">季卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label></details><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div>
 <label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><fieldset><legend>练习动作及掌握程度</legend><div id="trainingMoves"></div><button type="button" id="addTrainingMove">＋ 添加动作</button></fieldset>
 
 <label>备注<textarea name="notes" rows="2" maxlength="5000"></textarea></label>
@@ -108,7 +109,9 @@ dialog .dialog-save-top{width:auto}
 <div id="formStatus" role="status"></div><button class="primary" id="save">保存记录</button></form></dialog>
 <dialog id="detailEditor"><form id="detailForm"><div class="bar spread"><h2 id="detailTitle"></h2><button type="submit" class="primary dialog-save-top" id="detailSaveTop">保存</button></div>
 <label>日期<input name="date" type="date" required></label>
-<fieldset id="expenseFields"><legend>花销</legend><label>类别<select name="category"><option>场地费</option><option>月卡</option><option>年卡</option><option>其他冰场卡</option><option>教练费</option><option>装备费</option><option>考级费</option><option>其他</option></select></label><label>金额（元）<input name="amount" type="number" required min=".01" max="1000000" step=".01" inputmode="decimal"></label></fieldset>
+<fieldset id="expenseFields"><legend>花销</legend><label>类别<select name="category"><option>场地费</option><option>教练费</option><option>装备费</option><option>考级费</option><option>其他</option><option>历史训练费</option></select></label>
+<fieldset id="venueFields" hidden disabled><label>场地费类型<select name="passType"><option value="single">单次付费</option><option value="month">月卡</option><option value="quarter">季卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option></select></label>
+<div id="passDates" class="grid" hidden><label>有效期开始<input name="passStart" type="date" required disabled></label><label>有效期结束<input name="passEnd" type="date" required disabled></label></div></fieldset><label>金额（元）<input name="amount" type="number" required min=".01" max="1000000" step=".01" inputmode="decimal"></label></fieldset>
 <fieldset id="progressFields"><legend>动作阶段</legend><label>分类<select name="moveGroup"><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>其他</option><option>未分类</option></select></label><label>动作<input name="name" list="moveNames" maxlength="80" required placeholder="如 燕式滑行"><datalist id="moveNames"></datalist></label><label>阶段<select name="level"><option>开始练习</option><option>第一次掌握</option><option>逐渐熟练</option><option>稳定完成</option><option>自定义</option></select></label><label id="customLevelLabel" hidden>自定义阶段<input name="customLevel" maxlength="80" disabled></label><div class="attachment-picker"><button type="button" data-pick-file="progressFiles">添加照片或视频</button><small>每条最多 5 个，单个 20 MB</small><input id="progressFiles" name="media" type="file" accept="image/*,video/*" multiple hidden></div><div id="detailAttached"></div></fieldset>
 <fieldset id="iceFields" hidden disabled><label>冰时（小时）<input name="iceHours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label></fieldset>
 <label>备注<textarea name="notes" rows="2" maxlength="5000"></textarea></label><p id="detailStatus" role="status"></p><button class="primary" id="detailSave">保存</button></form></dialog>
@@ -172,9 +175,28 @@ function closeOnBackdrop(dialog,saveButton){
 }
 closeOnBackdrop(editor,byId('save'));
 closeOnBackdrop(detailEditor,byId('detailSave'));
-const feeCategories=['场地费','月卡','年卡','其他冰场卡','教练费','装备费','考级费','其他','历史训练费'];
+const feeCategories=['场地费','月卡','季卡','年卡','其他冰场卡','教练费','装备费','考级费','其他','历史训练费'];
 const moveCategories=['跳跃','旋转','步法','整活','其他','未分类'];
-const paymentLabels={month:'月卡',year:'年卡',other:'其他冰场卡',free:'免场地费'};
+const paymentLabels={single:'单次付费',month:'月卡',quarter:'季卡',year:'年卡',other:'其他冰场卡',free:'免场地费'};
+const passMonths={month:1,quarter:3,year:12};
+const legacyPassTypes={'月卡':'month','季卡':'quarter','年卡':'year','其他冰场卡':'other'};
+let previousRink='';
+function venueType(entry){return entry.category==='场地费'?entry.passType??'single':legacyPassTypes[entry.category];}
+function defaultPassEnd(start,months){
+ const [year,month,day]=start.split('-').map(Number), target=new Date(year,month-1+months,1);
+ const last=new Date(target.getFullYear(),target.getMonth()+1,0).getDate();
+ const end=new Date(target.getFullYear(),target.getMonth(),Math.min(day,last));
+ if(day<=last)end.setDate(end.getDate()-1);
+ return dateKey(end.getFullYear(),end.getMonth(),end.getDate());
+}
+function rinkPasses(entries){
+ return entries.flatMap(entry=>{
+  const type=entry.type==='expense'?venueType(entry):null;
+  if(!passMonths[type])return [];
+  const start=entry.passStart||entry.date;
+  return [{type,start,end:entry.passEnd||defaultPassEnd(start,passMonths[type])}];
+ });
+}
 const toHours=minutes=>Number((minutes/60).toFixed(2));
 const elapsedDays=(first,today)=>Math.max(0,Math.floor((Date.parse(today)-Date.parse(first))/86400000));
 const newId=()=>globalThis.crypto?.randomUUID?.()??Date.now()+'-'+Math.random().toString(36).slice(2);
@@ -189,8 +211,15 @@ function updateCoach(){
  form.elements.coachFee.disabled=!lesson;
 }
 form.elements.kind.onchange=updateCoach;
-function updatePayment(){const single=form.elements.payment.value==='single';byId('rinkFeeLabel').hidden=!single;form.elements.cost.disabled=!single;}
+function updatePayment(){
+ const payment=form.elements.payment.value, single=payment==='single';
+ byId('paymentSummary').textContent='场地结算 · '+(paymentLabels[payment]??paymentLabels.single);
+ byId('rinkFeeLabel').hidden=!single;form.elements.cost.disabled=!single;
+}
 form.elements.payment.onchange=updatePayment;
+form.elements.rink.onchange=()=>{
+ if(form.elements.rink.value.trim()!==previousRink)byId('paymentOptions').open=true;
+};
 const dateToday=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 const make=(tag,value,className)=>{const node=document.createElement(tag); if(value!==undefined)node.textContent=value;if(className)node.className=className;return node};
 function openDB(){return new Promise((resolve,reject)=>{const request=indexedDB.open('ice-practice-journal',1);request.onupgradeneeded=()=>request.result.createObjectStore('logs',{keyPath:'id'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);request.onblocked=()=>reject(Error('数据库正在被其他页面使用'));});}
@@ -241,7 +270,11 @@ function show(record){editing=record?.id??null;attachments=[...(record?.files??[
  if(record&&record.coachFee===undefined)form.elements.cost.value='';
  byId('legacyFeeLabel').hidden=!legacy;form.elements.legacyFee.disabled=!legacy;form.elements.legacyFee.value=legacy||'';
  form.elements.hours.value=record?toHours(record.minutes):'';updateCoach();
- form.elements.payment.value=record?.payment??'single';updatePayment();
+ const last=record??records[0];
+ previousRink=last?.rink?.trim()??'';
+ if(!record)form.elements.rink.value=last?.rink??'';
+ form.elements.payment.value=last?.payment??'single';
+ byId('paymentOptions').open=!last;updatePayment();
  form.elements.includeMoves.checked=record?.includeMoves!==false;
  trainingDefaultCategory=moveCategories.includes(record?.moveCategory)?record.moveCategory:'未分类';
  trainingMoves.replaceChildren();
@@ -286,6 +319,10 @@ function decode(record){
   if(!['expense','progress','ice'].includes(record.type)||typeof record.id!=='string'||!record.id||typeof record.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(record.date)||!Number.isFinite(record.updated)||typeof record.notes!=='string')throw Error('Invalid backup');
   if(record.type==='ice'&&(!Number.isInteger(record.minutes)||record.minutes<1||record.minutes>1440))throw Error('Invalid ice time');
   if(record.type==='expense'&&(!feeCategories.includes(record.category)||!Number.isInteger(record.cents)||record.cents<1||record.cents>100000000))throw Error('Invalid expense');
+  if(record.type==='expense'&&passMonths[venueType(record)]&&(record.passStart!==undefined||record.passEnd!==undefined)){
+   const datePattern=/^\d{4}-\d{2}-\d{2}$/;
+   if(typeof record.passStart!=='string'||typeof record.passEnd!=='string'||!datePattern.test(record.passStart)||!datePattern.test(record.passEnd)||record.passEnd<record.passStart)throw Error('Invalid pass dates');
+  }
   if(record.type==='progress'&&(typeof record.name!=='string'||!record.name.trim()||typeof record.level!=='string'||!record.level.trim()))throw Error('Invalid progress');
   return {...record,files:decodeFiles(record.files)};
  }
@@ -380,7 +417,7 @@ function expenseRows(){
  }
  return rows.sort((a,b)=>b.date.localeCompare(a.date)||b.updated-a.updated);
 }
-const rinkPassCategories=['月卡','年卡','其他冰场卡'];
+const rinkPassCategories=Object.keys(legacyPassTypes);
 function renderExpenses(){
  const rows=expenseRows(), month=dateToday().slice(0,7);
  const total=byId('expenseTotals'), list=byId('expenseList'), summary=make('div',undefined,'card');
@@ -396,8 +433,11 @@ function renderExpenses(){
  if(!rows.length)list.append(make('p','还没有花销。首页填写的场地费和教练费也会出现在这里。','card muted'));
  for(const row of rows){
   const card=make('article',undefined,'card'), top=make('div',undefined,'bar spread');
-  top.append(make('strong',row.category),make('strong',money(row.cents),'amount'));
+  const subtype=row.entry&&venueType(row.entry);
+  top.append(make('strong',subtype&&row.category==='场地费'?'场地费 · '+paymentLabels[subtype]:row.category),make('strong',money(row.cents),'amount'));
+  const pass=row.entry&&rinkPasses([row.entry])[0];
   card.append(top,make('p',row.date+(row.log?' · 来自训练日志':'')+(row.notes?' · '+row.notes:''),'muted'));
+  if(pass)card.append(make('p','有效期 '+pass.start+' 至 '+pass.end,'muted'));
   if(row.log){
    openCard(card,'花销 '+row.category+' '+row.date,()=>show(row.log));
    const field=row.category==='教练费'?'coachFee':row.category==='历史训练费'&&row.log.coachFee!==undefined?'legacyFee':'cost';
@@ -518,6 +558,13 @@ function iceSessions(){
 function renderCalendar(){
  const year=calendarMonth.getFullYear(), month=calendarMonth.getMonth(), prefix=dateKey(year,month,1).slice(0,7), today=dateToday();
  const byDay=new Map(), all=iceSessions(), logs=all.filter(r=>r.date.startsWith(prefix));
+ const lastDay=new Date(year,month+1,0).getDate();
+ const passes=rinkPasses(extras).filter(pass=>pass.start<=dateKey(year,month,lastDay)&&pass.end>=dateKey(year,month,1));
+ const legend=byId('passLegend');legend.replaceChildren();
+ for(const pass of passes){
+  const key=make('small',undefined,'pass-key');
+  key.append(make('span',undefined,'pass-marker '+pass.type),document.createTextNode(paymentLabels[pass.type]+' '+pass.start+' 至 '+pass.end));legend.append(key);
+ }
  for(const log of logs){if(!byDay.has(log.date))byDay.set(log.date,[]);byDay.get(log.date).push(log);}
  if(!selectedDay||!selectedDay.startsWith(prefix))selectedDay=today.startsWith(prefix)?today:(logs[0]?.date??dateKey(year,month,1));
  byId('calendarTitle').textContent=year+' 年 '+(month+1)+' 月';
@@ -531,6 +578,13 @@ function renderCalendar(){
   button.setAttribute('aria-pressed',String(date===selectedDay));
   if(date===today)button.setAttribute('aria-current','date');
   if(sessions.length){button.classList.add('has-ice');button.append(make('small',duration(totalMinutes(sessions))));}
+  const covered=[...new Set(passes.filter(pass=>date>=pass.start&&date<=pass.end).map(pass=>pass.type))];
+  if(covered.length){
+   const markers=make('span',undefined,'pass-markers');markers.setAttribute('aria-hidden','true');
+   for(const type of covered)markers.append(make('span',undefined,'pass-marker '+type));
+   button.append(markers);
+   button.setAttribute('aria-label',date+'，'+covered.map(type=>paymentLabels[type]).join('、')+'有效'+(sessions.length?'，'+duration(totalMinutes(sessions)):''));
+  }
   grid.append(button);
  }
  const details=byId('dayDetails'), sessions=byDay.get(selectedDay)??[];
@@ -573,6 +627,20 @@ function listDetailFiles(){
   panel.append(row);
  });
 }
+function updateVenueFields(resetEnd=false){
+ const f=detailForm.elements, venue=detailType==='expense'&&f.category.value==='场地费';
+ byId('venueFields').hidden=byId('venueFields').disabled=!venue;
+ const months=venue?passMonths[f.passType.value]:0;
+ byId('passDates').hidden=!months;
+ f.passStart.disabled=f.passEnd.disabled=!months;
+ if(months){
+  if(!f.passStart.value)f.passStart.value=f.date.value;
+  if(f.passStart.value&&(resetEnd||!f.passEnd.value))f.passEnd.value=defaultPassEnd(f.passStart.value,months);
+ }
+}
+detailForm.elements.category.onchange=()=>updateVenueFields();
+detailForm.elements.passType.onchange=()=>updateVenueFields(true);
+detailForm.elements.passStart.onchange=()=>updateVenueFields(true);
 function showDetail(type,record,name='',category='跳跃'){
  detailType=type;detailId=record?.id??null;detailFiles=[...(record?.files??[])];detailForm.reset();
  detailSource=record?.log?{sourceLogId:record.sourceLogId,sourceMove:record.sourceMove,name:record.name,originalCategory:record.moveGroup,categoryOverride:record.categoryOverride,date:record.date}:null;
@@ -582,12 +650,19 @@ function showDetail(type,record,name='',category='跳跃'){
  byId('iceFields').disabled=byId('iceFields').hidden=!ice;
  f.date.readOnly=!!detailSource;f.name.readOnly=!!detailSource;
  f.date.value=record?.date??(ice?selectedDay:dateToday())??dateToday();f.notes.value=record?.notes??'';
- if(expense){f.category.value=record?.category??'场地费';f.amount.value=record?record.cents/100:'';}
+ if(expense){
+  f.category.value=legacyPassTypes[record?.category]?'场地费':record?.category??'场地费';
+  f.amount.value=record?record.cents/100:'';
+  f.passType.value=record?venueType(record)??'single':'single';
+  f.passStart.value=record?.passStart??(record&&passMonths[f.passType.value]?record.date:'');
+  f.passEnd.value=record?.passEnd??'';
+ }
  else if(ice){f.iceHours.value=record?toHours(record.minutes):'';}
  else{
   f.name.value=record?.name??name;f.moveGroup.value=record?(record.moveGroup??'未分类'):category;
   if(record){f.level.value=record.level;if(!f.level.value||record.level==='自定义'){f.level.value='自定义';f.customLevel.value=record.level;}}
  }
+ updateVenueFields();
  byId('detailTitle').textContent=(record?'编辑':'记录')+(expense?'花销':ice?'冰时':'动作阶段');
  byId('detailStatus').textContent='';updateCustomLevel();listDetailFiles();detailEditor.showModal();
 }
@@ -605,7 +680,16 @@ detailForm.onsubmit=async event=>{
  const button=byId('detailSave');if(button.disabled)return;
  const fields=Object.fromEntries(new FormData(detailForm));
  const record={id:detailId||newId(),type:detailType,date:fields.date,notes:fields.notes,updated:Date.now(),files:[]};
- if(detailType==='expense'){record.category=fields.category;record.cents=Math.round(Number(fields.amount)*100);}
+ if(detailType==='expense'){
+  record.category=fields.category;record.cents=Math.round(Number(fields.amount)*100);
+  if(fields.category==='场地费'){
+   record.passType=fields.passType;
+   if(passMonths[record.passType]){
+    if(!fields.passStart||!fields.passEnd||fields.passEnd<fields.passStart){byId('detailStatus').textContent='请选择有效期，结束日期不能早于开始日期。';return;}
+    record.passStart=fields.passStart;record.passEnd=fields.passEnd;
+   }
+  }
+ }
  else if(detailType==='ice'){
   record.minutes=Math.round(Number(fields.iceHours)*60);
   if(!Number.isInteger(record.minutes)||record.minutes<1||record.minutes>1440){byId('detailStatus').textContent='请填写 1 分钟到 24 小时之间的冰时。';return;}
