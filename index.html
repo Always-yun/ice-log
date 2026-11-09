@@ -24,7 +24,7 @@ nav button.primary{background:var(--surface);color:var(--accent);border-color:va
 .hero small{color:#dfedff}
 .journey{margin:0 0 14px;color:var(--muted);font-size:14px}
 .grid,.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.stats{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px;gap:9px}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:14px;gap:9px}
 .stats>div{min-width:0;border-top:1px solid #bcd7f46b;padding-top:12px}
 .stats strong{display:block;font-size:clamp(19px,5vw,32px);line-height:1.2;overflow-wrap:anywhere}
 .stats small{display:block;margin-top:5px}
@@ -65,17 +65,19 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 .media-dialog{padding:15px}.media-dialog img,.media-dialog video{margin:10px auto 0;max-height:65dvh}.media-body{display:grid;gap:14px}
 .progress-filters{display:flex;gap:7px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:8px}.progress-filters button{flex:none}.progress-filters button[aria-pressed=true]{background:var(--accent);color:#fff}.record-actions{grid-column:1/-1;display:flex;justify-content:flex-end;margin-top:10px}.record-actions button{background:transparent;color:#8b352b}
 .home-heading{display:flex;justify-content:space-between;align-items:center;gap:16px}.avatar{position:relative;display:grid;place-items:center;flex:none;width:68px;height:68px;border-radius:50%;padding:0;overflow:hidden;font-size:24px;border:2px solid var(--line)}.avatar img{width:100%;height:100%;object-fit:cover;margin:0;border-radius:0}.avatar-preview{width:68px;height:68px;border-radius:50%;object-fit:cover;margin:0 0 12px}.stats button{min-width:0;text-align:left;border:0;border-top:1px solid #bcd7f46b;border-radius:0;background:transparent;color:inherit;padding:12px 3px 3px}.stats button:hover,.stats button:focus-visible{background:#ffffff17}.training-card{cursor:pointer}.training-card:hover{border-color:#a7c4e3}.record-title{min-height:44px;padding:5px 0;text-align:left;background:transparent;color:var(--ink);overflow-wrap:anywhere}.record-actions{pointer-events:none}.record-actions button{pointer-events:auto}
+.storage-note{margin:10px 0 0}
+@media(max-width:420px){.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}}
 </style>
 <main>
 <header id="homeHeader"><div class="home-heading"><div><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1></div><button type="button" class="avatar" id="profileButton" aria-label="编辑头像和昵称">＋</button></div><p class="muted">上冰、训练进展和花销，随手记在一起。</p></header>
 <nav aria-label="主导航"><button data-page="home" aria-current="page" class="primary">首页</button><button data-page="progress">动作</button><button data-page="ice">冰时</button><button data-page="expenses">花销</button></nav>
 <div id="status" role="status"></div>
 <div id="home" data-view>
-<p class="journey" id="journey"></p><section class="hero" aria-label="本月统计"><h2 id="monthTitle">本月上冰</h2><div class="stats"><button type="button" data-shortcut="ice"><strong id="minutes">0</strong><small>小时</small></button><button type="button" data-shortcut="ice"><strong id="sessions">0</strong><small>次上冰</small></button><button type="button" data-shortcut="expenses"><strong id="cost">¥0</strong><small>训练花费</small></button></div></section>
+<p class="journey" id="journey"></p><section class="hero" aria-label="本月统计"><h2 id="monthTitle">本月上冰</h2><div class="stats"><button type="button" data-shortcut="ice"><strong id="minutes">0</strong><small>小时</small></button><button type="button" data-shortcut="ice"><strong id="sessions">0</strong><small>次上冰</small></button><button type="button" data-shortcut="expenses"><strong id="cost">¥0</strong><small>训练花费</small></button><button type="button" data-shortcut="progress"><strong id="mastered">0</strong><small>个已掌握动作</small></button></div></section>
 <div class="bar spread"><h2>训练日志</h2><button class="primary" id="add" disabled>＋ 记一次上冰</button></div>
 <div id="records"></div>
 <section><h2>动作进度</h2><div class="card" id="skills"></div></section>
-<footer><div class="bar"><button id="export" disabled>导出备份</button><button id="import" disabled>导入备份</button><input id="backup" type="file" accept=".json,application/json" hidden></div><small>记录和附件保存在当前浏览器。清理浏览器数据或更换手机前，请先导出备份。备份包含照片和视频，请自行保管。</small></footer>
+<footer><div class="bar"><button id="export" disabled>导出备份</button><button id="import" disabled>导入备份</button><input id="backup" type="file" accept=".json,application/json" hidden></div><small>记录和附件保存在当前浏览器。清理浏览器数据或更换手机前，请先导出备份。备份包含照片和视频，请自行保管。</small><p class="storage-note"><small>训练记录、照片、视频、头像和昵称仅保存在你当前使用的浏览器里。冰迹不会将这些数据上传到云端，也不会通过网络同步。打开网页版需要加载网页，记录内容不会随之发送。</small></p></footer>
 </div>
 <section id="expenses" data-view hidden><div class="bar spread"><h2>花销</h2><button class="primary" id="addExpense" disabled>＋ 记一笔</button></div><div id="expenseTotals"></div><div id="expenseList"></div></section>
 <section id="progress" data-view hidden><div class="bar spread"><h2>动作掌握</h2><button class="primary" id="addProgress" disabled>＋ 记录阶段</button></div><div class="progress-filters" id="progressFilters" role="group" aria-label="筛选动作分类"></div><p id="noFilteredProgress" class="card muted" hidden>这个分类暂无动作记录。</p><div id="progressList"></div></section>
@@ -85,14 +87,14 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 </main>
 <dialog id="editor"><form id="form"><div class="bar spread"><h2 id="editorTitle">记一次上冰</h2><button type="button" id="close">关闭</button></div>
 <div class="grid"><label>日期<input name="date" type="date" required></label><label>上冰时长（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><label>场地结算<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div>
-<label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><label id="moveCategoryLabel">默认动作分类<select name="moveCategory"><option>未分类</option><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option></select></label><label>练习动作及掌握程度 <small>每行一个，用「动作：程度」记录。混合分类时可写「跳跃 / 后外点冰跳：练习中」</small><textarea name="moves" rows="3" maxlength="2000" placeholder="后外点冰跳：练习中&#10;燕式滑行：已掌握"></textarea></label>
+<label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><label id="moveCategoryLabel">默认动作分类<select name="moveCategory"><option>未分类</option><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>其他</option></select></label><label>练习动作及掌握程度 <small>每行一个，用「动作：程度」记录。混合分类时可写「跳跃 / 后外点冰跳：练习中」</small><textarea name="moves" rows="3" maxlength="2000" placeholder="后外点冰跳：练习中&#10;燕式滑行：已掌握"></textarea></label>
 <label>训练笔记 / 教练反馈<textarea name="notes" rows="3" maxlength="5000"></textarea></label>
 <label>添加照片或短视频 <small>每个最多 20 MB，每条最多 5 个</small><input name="files" type="file" multiple accept="image/*,video/*"></label><div id="attached"></div>
 <div id="formStatus" role="status"></div><button class="primary" id="save">保存记录</button></form></dialog>
 <dialog id="detailEditor"><form id="detailForm"><div class="bar spread"><h2 id="detailTitle"></h2><button type="button" id="detailClose">关闭</button></div>
 <label>日期<input name="date" type="date" required></label>
 <fieldset id="expenseFields"><legend>花销</legend><label>类别<select name="category"><option>场地费</option><option>月卡</option><option>年卡</option><option>其他冰场卡</option><option>教练费</option><option>装备费</option><option>考级费</option><option>其他</option></select></label><label>金额（元）<input name="amount" type="number" required min=".01" max="1000000" step=".01" inputmode="decimal"></label></fieldset>
-<fieldset id="progressFields"><legend>动作阶段</legend><label>分类<select name="moveGroup"><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>未分类</option></select></label><label>动作<input name="name" list="moveNames" maxlength="80" required placeholder="如 燕式滑行"><datalist id="moveNames"></datalist></label><label>阶段<select name="level"><option>开始练习</option><option>第一次掌握</option><option>逐渐熟练</option><option>稳定完成</option><option>自定义</option></select></label><label id="customLevelLabel" hidden>自定义阶段<input name="customLevel" maxlength="80" disabled></label><label>添加照片或短视频 <small>每个最多 20 MB，每条最多 5 个</small><input name="media" type="file" accept="image/*,video/*" multiple></label><div id="detailAttached"></div></fieldset>
+<fieldset id="progressFields"><legend>动作阶段</legend><label>分类<select name="moveGroup"><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>其他</option><option>未分类</option></select></label><label>动作<input name="name" list="moveNames" maxlength="80" required placeholder="如 燕式滑行"><datalist id="moveNames"></datalist></label><label>阶段<select name="level"><option>开始练习</option><option>第一次掌握</option><option>逐渐熟练</option><option>稳定完成</option><option>自定义</option></select></label><label id="customLevelLabel" hidden>自定义阶段<input name="customLevel" maxlength="80" disabled></label><label>添加照片或短视频 <small>每个最多 20 MB，每条最多 5 个</small><input name="media" type="file" accept="image/*,video/*" multiple></label><div id="detailAttached"></div></fieldset>
 <label>备注<textarea name="notes" rows="3" maxlength="5000"></textarea></label><p id="detailStatus" role="status"></p><button class="primary" id="detailSave">保存</button></form></dialog>
 <dialog id="mediaViewer" class="media-dialog" aria-labelledby="mediaTitle"><div class="bar spread"><h2 id="mediaTitle">照片与视频</h2><button id="closeMedia" type="button">关闭</button></div><div id="mediaBody" class="media-body"></div></dialog>
 <dialog id="profileEditor" aria-labelledby="profileTitle"><form id="profileForm"><div class="bar spread"><h2 id="profileTitle">个人资料</h2><button type="button" id="profileClose">关闭</button></div><img id="profilePreview" class="avatar-preview" alt="头像预览" hidden><label>头像<input type="file" name="avatar" accept="image/*"></label><button type="button" id="removeAvatar" hidden>移除头像</button><label>昵称<input name="nickname" maxlength="24" autocomplete="nickname" placeholder="选填"></label><p id="profileStatus" role="status"></p><button type="submit" class="primary" id="profileSave">保存资料</button></form></dialog>
@@ -104,7 +106,7 @@ let detailType, detailId, detailSource, detailFiles=[];
 let calendarMonth=new Date(), selectedDay;
 const detailForm=byId('detailForm'), detailEditor=byId('detailEditor');
 const feeCategories=['场地费','月卡','年卡','其他冰场卡','教练费','装备费','考级费','其他','历史训练费'];
-const moveCategories=['跳跃','旋转','步法','整活','未分类'];
+const moveCategories=['跳跃','旋转','步法','整活','其他','未分类'];
 const paymentLabels={month:'月卡',year:'年卡',other:'其他冰场卡',free:'免场地费'};
 const toHours=minutes=>Number((minutes/60).toFixed(2));
 const elapsedDays=(first,today)=>Math.max(0,Math.floor((Date.parse(today)-Date.parse(first))/86400000));
@@ -160,7 +162,8 @@ function render(){
   const remove=make('button','删除');remove.onclick=async()=>{if(!confirm('删除这条训练记录和其中的附件？'))return;try{await transact('readwrite',store=>store.delete(r.id));await refresh();say('已删除记录。');}catch{say('删除失败，请重试。');}};appendMedia(card,r.files);const actions=make('div',undefined,'record-actions');actions.append(remove);card.append(actions);list.append(card);
  }
  const panel=byId('skills');panel.replaceChildren();
- const groups=progressGroups();
+ const groups=progressGroups(true);
+ byId('mastered').textContent=countMastered(groups);
  if(!groups.size)panel.append(make('span','计入动作掌握的训练会在这里显示最新进度。','muted'));
  for(const {name,stages} of groups.values())panel.append(make('span',name+' · '+stages[0].level,'chip'));
  renderExpenses();renderProgress();renderCalendar();
@@ -264,6 +267,7 @@ function expenseRows(){
  }
  return rows.sort((a,b)=>b.date.localeCompare(a.date)||b.updated-a.updated);
 }
+const rinkPassCategories=['月卡','年卡','其他冰场卡'];
 function renderExpenses(){
  const rows=expenseRows(), month=dateToday().slice(0,7);
  const total=byId('expenseTotals'), list=byId('expenseList'), summary=make('div',undefined,'card');
@@ -271,7 +275,8 @@ function renderExpenses(){
  const sum=items=>items.reduce((acc,r)=>acc+r.cents,0);
  summary.append(make('h2','本月 '+money(sum(months))),make('p','累计 '+money(sum(rows))+' · 按类别','muted'));
  for(const category of feeCategories){
-  const subtotal=sum(rows.filter(r=>r.category===category));
+  if(rinkPassCategories.includes(category))continue;
+  const subtotal=sum(rows.filter(r=>r.category===category||(category==='场地费'&&rinkPassCategories.includes(r.category))));
   if(subtotal)summary.append(make('span',category+' '+money(subtotal),'chip'));
  }
  total.replaceChildren(summary);list.replaceChildren();
@@ -285,7 +290,13 @@ function renderExpenses(){
   list.append(card);
  }
 }
-function progressGroups(){
+const masteredStages=new Set(['第一次掌握','已掌握','逐渐熟练','稳定完成','熟练','已熟练']);
+function countMastered(groups){
+ const names=new Set();
+ for(const {name,stages} of groups.values())if(stages.some(stage=>masteredStages.has(stage.level)))names.add(name);
+ return names.size;
+}
+function progressGroups(includeHidden=false){
  const groups=new Map();
  const categorized=new Map(), linked=new Map(), sourceMoves=new Map(records.map(log=>[log.id,moveList(log.moves)]));
  const sourceKey=(logId,label)=>JSON.stringify([logId,label]);
@@ -296,16 +307,18 @@ function progressGroups(){
  }
  for(const stage of extras)if(stage.type==='progress'){
   if(stage.sourceLogId&&sourceMoves.get(stage.sourceLogId)?.some(([label])=>label===stage.sourceMove)){linked.set(sourceKey(stage.sourceLogId,stage.sourceMove),stage);continue;}
+  if(!includeHidden&&stage.hiddenFromProgress===true)continue;
   const category=moveCategories.includes(stage.moveGroup)?stage.moveGroup:'未分类';
   if(category!=='未分类'&&!categorized.has(stage.name))categorized.set(stage.name,category);
   add(stage.name,category,stage);
  }
  for(const log of records)if(log.includeMoves!==false)for(const [label,level] of new Map(sourceMoves.get(log.id))){
-  const prefix=label.match(/^(跳跃|旋转|步法|整活)\s*[\/／]\s*(.+)$/);
+  const prefix=label.match(/^(跳跃|旋转|步法|整活|其他)\s*[\/／]\s*(.+)$/);
   const name=prefix?prefix[2].trim():label;
   const defaultCategory=moveCategories.includes(log.moveCategory)?log.moveCategory:'未分类';
   const category=prefix?.[1]??(defaultCategory==='未分类'?categorized.get(name)??defaultCategory:defaultCategory);
   const saved=linked.get(sourceKey(log.id,label));
+  if(!includeHidden&&saved?.hiddenFromProgress===true)continue;
   add(name,category,{...saved,date:log.date,updated:saved?.updated??log.updated,level:saved?.level??level,log,sourceMove:label});
  }
  for(const group of groups.values())group.stages.sort((a,b)=>b.date.localeCompare(a.date)||b.updated-a.updated);
@@ -351,9 +364,31 @@ function renderProgress(){
    else{if(stage.notes)item.append(make('p',stage.notes));appendDetailActions(item,stage);appendMedia(item,stage.files);}
    timeline.append(item);
   }
-  card.append(timeline);const section=sections.get(category);section.append(card);
+  const actions=make('div',undefined,'record-actions');
+  const remove=actionButton('删除',()=>deleteProgressCard(name,category,stages,remove));
+  remove.setAttribute('aria-label','从动作页删除 '+name);
+  actions.append(remove);card.append(timeline,actions);const section=sections.get(category);section.append(card);
  }
  applyProgressFilter();
+}
+async function deleteProgressCard(name,category,stages,button){
+ if(!confirm('从动作页删除「'+name+'」及其阶段和动作附件？原训练日志和训练附件会保留。'))return;
+ button.disabled=true;
+ try{
+  await transact('readwrite',store=>{
+   for(const stage of stages){
+    if(!stage.log){store.put({...stage,files:[],notes:'',hiddenFromProgress:true});continue;}
+    const sourceLogId=stage.log.id, sourceMove=stage.sourceMove;
+    store.put({
+     id:stage.id||'linked:'+JSON.stringify([sourceLogId,sourceMove]),
+     type:'progress',name,moveGroup:category,sourceLogId,sourceMove,
+     date:stage.date,updated:Date.now(),level:stage.level,notes:'',files:[],hiddenFromProgress:true
+    });
+   }
+  });
+  await refresh();say('已从动作页删除',true);
+ }catch{say('删除失败，请重试。');}
+ finally{button.disabled=false;}
 }
 function appendDetailActions(parent,record){
  const actions=make('div',undefined,'bar');
