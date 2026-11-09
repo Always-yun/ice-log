@@ -68,6 +68,8 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 .storage-note{margin:10px 0 0}
 @media(max-width:420px){.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}}
 .hero-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px}.hero-heading h2{margin:0}.skate-sticker{width:92px;height:58px;flex:none;overflow:visible}.stats .tracked{font-size:11px;color:#c6ddf5}.stats button:focus-visible{outline-color:#d2e7ff}.mastered-help{margin:0 0 12px;font-size:14px}
+.training-fields{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:10px 9px;margin-bottom:12px}.training-fields>label{min-width:0;margin:0}.training-fields input,.training-fields select{max-width:100%}.training-fields input[type=date]{display:block;min-inline-size:0;inline-size:100%;padding-inline:7px}.training-fields input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0;min-width:0}.record-top{margin-bottom:3px}.training-card.with-media{row-gap:4px}.training-card .record-footer{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 0}.record-footer .record-summary{margin:0;font-size:14px;white-space:nowrap}.record-footer button{flex:none;padding:5px 8px;background:transparent;color:#8b352b}.attachment-picker{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 8px}.file-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin-bottom:6px}.file-row span{overflow-wrap:anywhere;font-size:14px}
+@media(max-width:600px){.training-fields>label{font-size:14px}.training-card.with-media .media-rail{width:clamp(57px,17vw,80px)}}
 </style>
 <main>
 <header id="homeHeader"><div class="home-heading"><div><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1></div><button type="button" class="avatar" id="profileButton" aria-label="编辑头像和昵称">＋</button></div><p class="muted">上冰、训练进展和花销，随手记在一起。</p></header>
@@ -94,21 +96,24 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 
 </main>
 <dialog id="editor"><form id="form"><div class="bar spread"><h2 id="editorTitle">记一次上冰</h2><button type="button" id="close">关闭</button></div>
-<div class="grid"><label>日期<input name="date" type="date" required></label><label>上冰时长（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><label>场地结算<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div>
+<div class="grid training-fields"><label>日期<input name="date" type="date" required></label><label>冰时（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><label>场地结算<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div>
 <label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><label id="moveCategoryLabel">默认动作分类<select name="moveCategory"><option>未分类</option><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>其他</option></select></label><label>练习动作及掌握程度 <small>每行一个，用「动作：程度」记录。例如「跳跃 / 华尔兹跳：第一次掌握」会计入已掌握</small><textarea name="moves" rows="3" maxlength="2000" placeholder="后外点冰跳：练习中&#10;燕式滑行：已掌握"></textarea></label>
 <label>训练笔记 / 教练反馈<textarea name="notes" rows="3" maxlength="5000"></textarea></label>
-<label>添加照片或短视频 <small>每个最多 20 MB，每条最多 5 个</small><input name="files" type="file" multiple accept="image/*,video/*"></label><div id="attached"></div>
+<div class="attachment-picker"><button type="button" data-pick-file="trainingFiles">添加照片或视频</button><small>每条最多 5 个，单个 20 MB</small><input id="trainingFiles" name="files" type="file" multiple accept="image/*,video/*" hidden></div><div id="attached"></div>
 <div id="formStatus" role="status"></div><button class="primary" id="save">保存记录</button></form></dialog>
 <dialog id="detailEditor"><form id="detailForm"><div class="bar spread"><h2 id="detailTitle"></h2><button type="button" id="detailClose">关闭</button></div>
 <label>日期<input name="date" type="date" required></label>
 <fieldset id="expenseFields"><legend>花销</legend><label>类别<select name="category"><option>场地费</option><option>月卡</option><option>年卡</option><option>其他冰场卡</option><option>教练费</option><option>装备费</option><option>考级费</option><option>其他</option></select></label><label>金额（元）<input name="amount" type="number" required min=".01" max="1000000" step=".01" inputmode="decimal"></label></fieldset>
-<fieldset id="progressFields"><legend>动作阶段</legend><label>分类<select name="moveGroup"><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>其他</option><option>未分类</option></select></label><label>动作<input name="name" list="moveNames" maxlength="80" required placeholder="如 燕式滑行"><datalist id="moveNames"></datalist></label><label>阶段<select name="level"><option>开始练习</option><option>第一次掌握</option><option>逐渐熟练</option><option>稳定完成</option><option>自定义</option></select></label><label id="customLevelLabel" hidden>自定义阶段<input name="customLevel" maxlength="80" disabled></label><label>添加照片或短视频 <small>每个最多 20 MB，每条最多 5 个</small><input name="media" type="file" accept="image/*,video/*" multiple></label><div id="detailAttached"></div></fieldset>
+<fieldset id="progressFields"><legend>动作阶段</legend><label>分类<select name="moveGroup"><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>其他</option><option>未分类</option></select></label><label>动作<input name="name" list="moveNames" maxlength="80" required placeholder="如 燕式滑行"><datalist id="moveNames"></datalist></label><label>阶段<select name="level"><option>开始练习</option><option>第一次掌握</option><option>逐渐熟练</option><option>稳定完成</option><option>自定义</option></select></label><label id="customLevelLabel" hidden>自定义阶段<input name="customLevel" maxlength="80" disabled></label><div class="attachment-picker"><button type="button" data-pick-file="progressFiles">添加照片或视频</button><small>每条最多 5 个，单个 20 MB</small><input id="progressFiles" name="media" type="file" accept="image/*,video/*" multiple hidden></div><div id="detailAttached"></div></fieldset>
 <label>备注<textarea name="notes" rows="3" maxlength="5000"></textarea></label><p id="detailStatus" role="status"></p><button class="primary" id="detailSave">保存</button></form></dialog>
 <dialog id="mediaViewer" class="media-dialog" aria-labelledby="mediaTitle"><div class="bar spread"><h2 id="mediaTitle">照片与视频</h2><button id="closeMedia" type="button">关闭</button></div><div id="mediaBody" class="media-body"></div></dialog>
-<dialog id="profileEditor" aria-labelledby="profileTitle"><form id="profileForm"><div class="bar spread"><h2 id="profileTitle">个人资料</h2><button type="button" id="profileClose">关闭</button></div><img id="profilePreview" class="avatar-preview" alt="头像预览" hidden><label>头像<input type="file" name="avatar" accept="image/*"></label><button type="button" id="removeAvatar" hidden>移除头像</button><label>昵称<input name="nickname" maxlength="24" autocomplete="nickname" placeholder="选填"></label><p id="profileStatus" role="status"></p><button type="submit" class="primary" id="profileSave">保存资料</button></form></dialog>
+<dialog id="profileEditor" aria-labelledby="profileTitle"><form id="profileForm"><div class="bar spread"><h2 id="profileTitle">个人资料</h2><button type="button" id="profileClose">关闭</button></div><img id="profilePreview" class="avatar-preview" alt="头像预览" hidden><div class="attachment-picker"><button type="button" data-pick-file="profileFile">选择头像</button><input id="profileFile" type="file" name="avatar" accept="image/*" hidden></div><button type="button" id="removeAvatar" hidden>移除头像</button><label>昵称<input name="nickname" maxlength="24" autocomplete="nickname" placeholder="选填"></label><p id="profileStatus" role="status"></p><button type="submit" class="primary" id="profileSave">保存资料</button></form></dialog>
 <script>
 const byId=id=>document.getElementById(id), form=byId('form'), editor=byId('editor');
 const MAX=20*1024*1024;
+document.querySelectorAll('[data-pick-file]').forEach(button=>{
+ button.onclick=()=>byId(button.dataset.pickFile).click();
+});
 let db, records=[], extras=[], editing=null, attachments=[], urls=[];
 let detailType, detailId, detailSource, detailFiles=[];
 let calendarMonth=new Date(), selectedDay;
@@ -159,15 +164,15 @@ function render(){
  const list=byId('records');list.replaceChildren();
  if(!records.length)list.append(make('p','暂无训练记录。点击「记一次上冰」添加。','card muted'));
  for(const r of records){
-  const card=make('article',undefined,'card training-card'), top=make('div',undefined,'bar spread');
+  const card=make('article',undefined,'card training-card'), top=make('div',undefined,'record-top');
   const title=actionButton(r.date+(r.rink?' · '+r.rink:''),()=>show(r));
   title.className='record-title';title.setAttribute('aria-label','编辑 '+title.textContent+' 的训练记录');
   top.append(title);
   card.onclick=event=>{if(!event.target.closest('button,a,input,video'))show(r);};
-  card.append(top,make('p',r.kind+' · '+duration(r.minutes)+' · '+money(Math.round((r.cost+(r.coachFee??0)+(r.legacyFee??0))*100))+(r.kind==='教练课'&&r.coach?' · 教练 '+r.coach:'')+(paymentLabels[r.payment]?' · '+paymentLabels[r.payment]:''),'muted'));
+  card.append(top);
   for(const [name,level] of moveList(r.moves)){card.append(make('span',name+' · '+level,'chip'));}
   if(r.notes)card.append(make('p',r.notes));
-  const remove=make('button','删除');remove.onclick=async()=>{if(!confirm('删除这条训练记录和其中的附件？'))return;try{await transact('readwrite',store=>store.delete(r.id));await refresh();say('已删除记录。');}catch{say('删除失败，请重试。');}};appendMedia(card,r.files);const actions=make('div',undefined,'record-actions');actions.append(remove);card.append(actions);list.append(card);
+  const remove=make('button','删除');remove.onclick=async()=>{if(!confirm('删除这条训练记录和其中的附件？'))return;try{await transact('readwrite',store=>store.delete(r.id));await refresh();say('已删除记录。');}catch{say('删除失败，请重试。');}};appendMedia(card,r.files);const footer=make('div',undefined,'record-footer');footer.append(make('p',r.kind+' · '+duration(r.minutes),'record-summary muted'),remove);card.append(footer);list.append(card);
  }
  const panel=byId('skills');panel.replaceChildren();
  const groups=progressGroups(true);
@@ -177,7 +182,7 @@ function render(){
  for(const {name,stages} of groups.values())panel.append(make('span',name+' · '+stages[0].level,'chip'));
  renderExpenses();renderProgress();renderCalendar();
 }
-function listAttachments(){const panel=byId('attached');panel.replaceChildren();attachments.forEach((file,index)=>{const row=make('div',undefined,'bar');row.append(make('span',file.name));const remove=make('button','移除');remove.type='button';remove.onclick=()=>{attachments.splice(index,1);listAttachments();};row.append(remove);panel.append(row);});}
+function listAttachments(){const panel=byId('attached');panel.replaceChildren();attachments.forEach((file,index)=>{const row=make('div',undefined,'file-row');row.append(make('span',file.name));const remove=make('button','移除');remove.type='button';remove.onclick=()=>{attachments.splice(index,1);listAttachments();};row.append(remove);panel.append(row);});}
 function show(record){editing=record?.id??null;attachments=[...(record?.files??[])];form.reset();form.elements.date.value=dateToday();for(const key of ['date','rink','cost','kind','coach','moves','notes'])if(record)form.elements[key].value=record[key];byId('editorTitle').textContent=record?'编辑训练':'记一次上冰';byId('formStatus').textContent='';form.elements.coachFee.value=record?.coachFee??'';
  const legacy=record?.legacyFee??(record&&record.coachFee===undefined?record.cost:0);
  if(record&&record.coachFee===undefined)form.elements.cost.value='';
@@ -456,7 +461,7 @@ function updateCustomLevel(){
 function listDetailFiles(){
  const panel=byId('detailAttached');panel.replaceChildren();
  detailFiles.forEach((file,i)=>{
-  const row=make('div',undefined,'bar');
+  const row=make('div',undefined,'file-row');
   row.append(make('span',file.name),actionButton('移除',()=>{detailFiles.splice(i,1);listDetailFiles();}));
   panel.append(row);
  });
