@@ -73,6 +73,7 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 .openable{cursor:pointer}.openable:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.openable:hover{border-color:#a7c4e3}.move-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center;margin-bottom:8px}.move-row input,.move-row select{margin:0}.move-row button{padding-inline:7px}.move-row .remove-move{background:transparent;color:#8b352b}.stage-row{border-radius:8px}.stage-row:hover{background:var(--paper)}
 @media(max-width:600px){html{zoom:.75}}
 .move-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.move-row .move-name{grid-column:1/-1}.move-row select{min-width:0;padding-inline:6px}
+dialog .dialog-save-top{width:auto}
 </style>
 <main>
 <header id="homeHeader"><div class="home-heading"><div><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1></div><button type="button" class="avatar" id="profileButton" aria-label="编辑头像和昵称">＋</button></div><p class="muted">上冰、训练和花销，随手记在一起。</p></header>
@@ -98,14 +99,14 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 <div class="card"><div class="bar spread"><button id="prevMonth" aria-label="上个月">‹</button><h2 id="calendarTitle" class="cal-title"></h2><button id="nextMonth" aria-label="下个月">›</button></div><p id="calendarTotal"></p><div class="calendar" id="calendar"></div></div><div id="dayDetails"></div></section>
 
 </main>
-<dialog id="editor"><form id="form"><div class="bar spread"><h2 id="editorTitle">记一次上冰</h2><button type="button" id="close">关闭</button></div>
+<dialog id="editor"><form id="form"><div class="bar spread"><h2 id="editorTitle">记一次上冰</h2><button type="submit" class="primary dialog-save-top" id="saveTop">保存</button></div>
 <div class="grid training-fields"><label>日期<input name="date" type="date" required></label><label>冰时（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><label>场地结算<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div>
 <label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><fieldset><legend>练习动作及掌握程度</legend><div id="trainingMoves"></div><button type="button" id="addTrainingMove">＋ 添加动作</button></fieldset>
 
-<label>训练笔记 / 教练反馈<textarea name="notes" rows="3" maxlength="5000"></textarea></label>
+<label>备注<textarea name="notes" rows="2" maxlength="5000"></textarea></label>
 <div class="attachment-picker"><button type="button" data-pick-file="trainingFiles">添加照片或视频</button><small>每条最多 5 个，单个 20 MB</small><input id="trainingFiles" name="files" type="file" multiple accept="image/*,video/*" hidden></div><div id="attached"></div>
 <div id="formStatus" role="status"></div><button class="primary" id="save">保存记录</button></form></dialog>
-<dialog id="detailEditor"><form id="detailForm"><div class="bar spread"><h2 id="detailTitle"></h2><button type="button" id="detailClose">关闭</button></div>
+<dialog id="detailEditor"><form id="detailForm"><div class="bar spread"><h2 id="detailTitle"></h2><button type="submit" class="primary dialog-save-top" id="detailSaveTop">保存</button></div>
 <label>日期<input name="date" type="date" required></label>
 <fieldset id="expenseFields"><legend>花销</legend><label>类别<select name="category"><option>场地费</option><option>月卡</option><option>年卡</option><option>其他冰场卡</option><option>教练费</option><option>装备费</option><option>考级费</option><option>其他</option></select></label><label>金额（元）<input name="amount" type="number" required min=".01" max="1000000" step=".01" inputmode="decimal"></label></fieldset>
 <fieldset id="progressFields"><legend>动作阶段</legend><label>分类<select name="moveGroup"><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>其他</option><option>未分类</option></select></label><label>动作<input name="name" list="moveNames" maxlength="80" required placeholder="如 燕式滑行"><datalist id="moveNames"></datalist></label><label>阶段<select name="level"><option>开始练习</option><option>第一次掌握</option><option>逐渐熟练</option><option>稳定完成</option><option>自定义</option></select></label><label id="customLevelLabel" hidden>自定义阶段<input name="customLevel" maxlength="80" disabled></label><div class="attachment-picker"><button type="button" data-pick-file="progressFiles">添加照片或视频</button><small>每条最多 5 个，单个 20 MB</small><input id="progressFiles" name="media" type="file" accept="image/*,video/*" multiple hidden></div><div id="detailAttached"></div></fieldset>
@@ -155,6 +156,22 @@ let db, records=[], extras=[], editing=null, attachments=[], urls=[];
 let detailType, detailId, detailSource, detailFiles=[];
 let calendarMonth=new Date(), selectedDay;
 const detailForm=byId('detailForm'), detailEditor=byId('detailEditor');
+function closeOnBackdrop(dialog,saveButton){
+ let pressedOutside=false;
+ function outside(event){
+  if(event.target!==dialog)return false;
+  const box=dialog.getBoundingClientRect();
+  return event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom;
+ }
+ dialog.addEventListener('pointerdown',event=>{pressedOutside=outside(event);});
+ dialog.addEventListener('click',event=>{
+  if(pressedOutside&&outside(event)&&!saveButton.disabled)dialog.close();
+  pressedOutside=false;
+ });
+ dialog.addEventListener('close',()=>{pressedOutside=false;});
+}
+closeOnBackdrop(editor,byId('save'));
+closeOnBackdrop(detailEditor,byId('detailSave'));
 const feeCategories=['场地费','月卡','年卡','其他冰场卡','教练费','装备费','考级费','其他','历史训练费'];
 const moveCategories=['跳跃','旋转','步法','整活','其他','未分类'];
 const paymentLabels={month:'月卡',year:'年卡',other:'其他冰场卡',free:'免场地费'};
@@ -232,10 +249,10 @@ function show(record){editing=record?.id??null;attachments=[...(record?.files??[
  if(moves.length)for(const [name,level] of moves)addTrainingMove(name,level);
  else addTrainingMove();
  listAttachments();editor.showModal();}
-byId('add').onclick=()=>show();byId('close').onclick=()=>editor.close();
+byId('add').onclick=()=>show();
 form.elements.files.onchange=()=>{const files=[...form.elements.files.files];form.elements.files.value='';if(files.length+attachments.length>5||files.some(f=>!validMedia(f))){byId('formStatus').textContent='请选择图片或视频，每个最多 20 MB，每条最多 5 个。';return;}attachments.push(...files);byId('formStatus').textContent='';listAttachments();};
 function validMedia(file){return /^(image|video)\//.test(file.type)&&file.size>0&&file.size<=MAX;}
-form.onsubmit=async event=>{event.preventDefault();const save=byId('save');if(save.disabled)return;save.disabled=true;try{
+form.onsubmit=async event=>{event.preventDefault();const save=byId('save');if(save.disabled)return;byId('saveTop').disabled=save.disabled=true;try{
  const fields=Object.fromEntries(new FormData(form));
  const minutes=Math.round(Number(fields.hours)*60);
  if(!Number.isInteger(minutes)||minutes<1||minutes>1440){byId('formStatus').textContent='请填写 1 分钟到 24 小时之间的冰时。';return;}
@@ -257,7 +274,7 @@ form.onsubmit=async event=>{event.preventDefault();const save=byId('save');if(sa
    }
   };
  });editor.close();await refresh();say('已保存',true);
- }catch{byId('formStatus').textContent='保存失败。请检查浏览器存储空间，或减少附件后重试。';}finally{save.disabled=false;}};
+ }catch{byId('formStatus').textContent='保存失败。请检查浏览器存储空间，或减少附件后重试。';}finally{byId('saveTop').disabled=save.disabled=false;}};
 function encode(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({name:file.name,type:file.type,data:reader.result.split(',')[1]});reader.onerror=()=>reject(reader.error);reader.readAsDataURL(file);});}
 byId('export').onclick=async()=>{const button=byId('export');button.disabled=true;try{
  const entries=[];for(const record of await transact('readonly',store=>store.getAll()))entries.push({...record,files:await Promise.all(record.files.map(encode))});
@@ -577,7 +594,6 @@ function showDetail(type,record,name='',category='跳跃'){
 byId('addExpense').onclick=()=>showDetail('expense');
 byId('addProgress').onclick=()=>showDetail('progress');
 byId('addIce').onclick=()=>showDetail('ice');
-byId('detailClose').onclick=()=>detailEditor.close();
 detailForm.elements.level.onchange=updateCustomLevel;
 detailForm.elements.media.onchange=()=>{
  const input=detailForm.elements.media, files=[...input.files];input.value='';
@@ -603,12 +619,12 @@ detailForm.onsubmit=async event=>{
   record.level=(fields.customLevel??fields.level).trim();record.files=[...detailFiles];
   if(!record.name||!record.level){byId('detailStatus').textContent='请填写动作名称和阶段。';return;}
  }
- button.disabled=true;
+ byId('detailSaveTop').disabled=button.disabled=true;
  try{await transact('readwrite',store=>store.put(record));detailEditor.close();
   if(record.type==='ice'){selectedDay=record.date;calendarMonth=new Date(record.date+'T12:00:00');}
   await refresh();say('已保存',true);}
  catch{byId('detailStatus').textContent='保存失败，请检查浏览器剩余空间。';}
- finally{button.disabled=false;}
+ finally{byId('detailSaveTop').disabled=button.disabled=false;}
 };
 
 const profileForm=byId('profileForm'), profileEditor=byId('profileEditor'), profileButton=byId('profileButton');
