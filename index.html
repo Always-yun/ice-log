@@ -76,7 +76,7 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 .move-row{grid-template-columns:minmax(0,1.3fr) minmax(0,.85fr) minmax(0,1.25fr) auto}.move-row select{min-width:0;padding-inline:4px}.move-row input{padding-inline:5px}
 dialog button.dialog-save-top[type=submit]{width:auto;flex:none}
 .pass-markers{display:flex;justify-content:center;gap:2px;margin-top:3px}.pass-marker{height:3px;width:9px;border-radius:4px;background:#2b71b5}.pass-marker.quarter{background:#835ba6}.pass-marker.year{background:#27806a}.pass-legend:not(:empty){display:grid;gap:5px;margin-top:12px}.pass-key{display:flex;align-items:center;gap:7px}.pass-key .pass-marker{flex:none}
-.training-group{border-top:1px solid var(--line);padding-top:4px;margin-bottom:8px}.training-group legend{padding-right:7px;margin-bottom:2px;font-size:14px}.training-trio{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.training-trio>label:first-child:last-of-type,.training-trio:not(:has(>label:not(:first-child):not([hidden])))>label:first-child{grid-column:1/-1}.training-trio input,.training-trio select{padding-inline:6px}.payment-toggle{display:block;background:transparent;color:var(--accent);min-height:38px;padding:4px 0;font-size:14px}.payment-toggle::before{content:'▸';margin-right:5px}.payment-toggle[aria-expanded=true]::before{content:'▾'}
+.rink-line{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px}.rink-line .payment-toggle{margin-bottom:4px;text-align:left}.training-trio{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.training-trio>label:first-child:last-of-type,.training-trio:not(:has(>label:not(:first-child):not([hidden])))>label:first-child{grid-column:1/-1}.training-trio input,.training-trio select{padding-inline:6px}.payment-toggle{display:block;background:transparent;color:var(--accent);min-height:38px;padding:4px 0;font-size:14px}.payment-toggle::before{content:'▸';margin-right:5px}.payment-toggle[aria-expanded=true]::before{content:'▾'}
 </style>
 <main>
 <header id="homeHeader"><div class="home-heading"><div><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1></div><button type="button" class="avatar" id="profileButton" aria-label="编辑头像和昵称">＋</button></div><p class="muted">上冰、训练和花销，随手记在一起。</p></header>
@@ -104,13 +104,13 @@ dialog button.dialog-save-top[type=submit]{width:auto;flex:none}
 </main>
 <dialog id="editor"><form id="form"><div class="bar spread"><h2 id="editorTitle">记一次上冰</h2><button type="submit" class="primary dialog-save-top" id="saveTop">保存</button></div>
 <div class="grid training-fields"><label>日期<input name="date" type="date" required></label><label>冰时（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label></div>
-<fieldset class="training-group"><legend>冰场费用</legend>
-<button type="button" id="paymentSummary" class="payment-toggle" aria-expanded="false" aria-controls="venueTrainingRow">场地结算</button>
-<div id="venueTrainingRow" class="grid training-fields training-trio"><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><label id="paymentMethodLabel">结算方式<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="quarter">季卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label></div>
+<fieldset aria-label="冰场与结算">
+<div class="rink-line training-fields"><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><button type="button" id="paymentSummary" class="payment-toggle" aria-expanded="false" aria-controls="venueTrainingRow">场地结算</button></div>
+<div id="venueTrainingRow" class="grid training-fields" hidden><label id="paymentMethodLabel">结算方式<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="quarter">季卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label></div>
 <label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></fieldset>
-<fieldset class="training-group"><legend>训练与教练</legend>
+<fieldset aria-label="训练与教练">
 <div class="grid training-fields training-trio"><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div></fieldset>
-<label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><fieldset><legend>练习动作及掌握程度</legend><div id="trainingMoves"></div><button type="button" id="addTrainingMove">＋ 添加动作</button></fieldset>
+<label class="toggle"><input name="includeMoves" type="checkbox" aria-controls="trainingMoveFields">将本次练习动作纳入动作掌握</label><fieldset id="trainingMoveFields" hidden><legend>练习动作及掌握程度</legend><div id="trainingMoves"></div><button type="button" id="addTrainingMove">＋ 添加动作</button></fieldset>
 
 <label>备注<textarea name="notes" rows="2" maxlength="5000"></textarea></label>
 <div class="attachment-picker"><button type="button" data-pick-file="trainingFiles">添加照片或视频</button><small>每条最多 5 个，单个 20 MB</small><input id="trainingFiles" name="files" type="file" multiple accept="image/*,video/*" hidden></div><div id="attached"></div>
@@ -130,6 +130,8 @@ const byId=id=>document.getElementById(id), form=byId('form'), editor=byId('edit
 const MAX=20*1024*1024;
 const trainingLevels=['练习中','第一次掌握','逐渐熟练','稳定完成'];
 const trainingMoves=byId('trainingMoves');
+function updateTrainingMoveVisibility(){byId('trainingMoveFields').hidden=!form.elements.includeMoves.checked;}
+form.elements.includeMoves.onchange=updateTrainingMoveVisibility;
 let trainingDefaultCategory='未分类';
 function splitMoveLabel(label,fallback){
  const prefix=label.match(/^(跳跃|旋转|步法|整活|其他|未分类)\s*[\/／]\s*(.+)$/);
@@ -225,7 +227,7 @@ function updatePayment(){
  const toggle=byId('paymentSummary');
  toggle.textContent='场地结算 · '+(paymentLabels[payment]??paymentLabels.single);
  toggle.setAttribute('aria-expanded',String(paymentExpanded));
- byId('paymentMethodLabel').hidden=!paymentExpanded;
+ byId('venueTrainingRow').hidden=!paymentExpanded;
  byId('rinkFeeLabel').hidden=!paymentExpanded||!single;
  form.elements.cost.disabled=!single;
 }
@@ -291,7 +293,8 @@ function show(record){editing=record?.id??null;attachments=[...(record?.files??[
  if(!record)form.elements.rink.value=last?.rink??'';
  form.elements.payment.value=last?.payment??'single';
  expandPayment(!last);
- form.elements.includeMoves.checked=record?.includeMoves!==false;
+ form.elements.includeMoves.checked=!!record&&record.includeMoves!==false;
+ updateTrainingMoveVisibility();
  trainingDefaultCategory=moveCategories.includes(record?.moveCategory)?record.moveCategory:'未分类';
  trainingMoves.replaceChildren();
  const moves=moveList(record?.moves??'');
