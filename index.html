@@ -64,13 +64,14 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 .media-thumb span{z-index:1;padding:2px 7px;border-radius:20px;background:#173b61e6;color:white;font-size:13px}
 .media-dialog{padding:15px}.media-dialog img,.media-dialog video{margin:10px auto 0;max-height:65dvh}.media-body{display:grid;gap:14px}
 .progress-filters{display:flex;gap:7px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:8px}.progress-filters button{flex:none}.progress-filters button[aria-pressed=true]{background:var(--accent);color:#fff}.record-actions{grid-column:1/-1;display:flex;justify-content:flex-end;margin-top:10px}.record-actions button{background:transparent;color:#8b352b}
+.home-heading{display:flex;justify-content:space-between;align-items:center;gap:16px}.avatar{position:relative;display:grid;place-items:center;flex:none;width:68px;height:68px;border-radius:50%;padding:0;overflow:hidden;font-size:24px;border:2px solid var(--line)}.avatar img{width:100%;height:100%;object-fit:cover;margin:0;border-radius:0}.avatar-preview{width:68px;height:68px;border-radius:50%;object-fit:cover;margin:0 0 12px}.stats button{min-width:0;text-align:left;border:0;border-top:1px solid #bcd7f46b;border-radius:0;background:transparent;color:inherit;padding:12px 3px 3px}.stats button:hover,.stats button:focus-visible{background:#ffffff17}.training-card{cursor:pointer}.training-card:hover{border-color:#a7c4e3}.record-title{min-height:44px;padding:5px 0;text-align:left;background:transparent;color:var(--ink);overflow-wrap:anywhere}.record-actions{pointer-events:none}.record-actions button{pointer-events:auto}
 </style>
 <main>
-<header id="homeHeader"><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1><p class="muted">上冰、训练进展和花销，随手记在一起。</p></header>
-<nav aria-label="主导航"><button data-page="home" aria-current="page" class="primary">首页</button><button data-page="expenses">花销</button><button data-page="progress">动作掌握</button><button data-page="ice">冰时总览</button></nav>
+<header id="homeHeader"><div class="home-heading"><div><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1></div><button type="button" class="avatar" id="profileButton" aria-label="编辑头像和昵称">＋</button></div><p class="muted">上冰、训练进展和花销，随手记在一起。</p></header>
+<nav aria-label="主导航"><button data-page="home" aria-current="page" class="primary">首页</button><button data-page="progress">动作</button><button data-page="ice">冰时</button><button data-page="expenses">花销</button></nav>
 <div id="status" role="status"></div>
 <div id="home" data-view>
-<p class="journey" id="journey"></p><section class="hero" aria-label="本月统计"><h2 id="monthTitle">本月上冰</h2><div class="stats"><div><strong id="minutes">0</strong><small>小时</small></div><div><strong id="sessions">0</strong><small>次上冰</small></div><div><strong id="cost">¥0</strong><small>训练花费</small></div></div></section>
+<p class="journey" id="journey"></p><section class="hero" aria-label="本月统计"><h2 id="monthTitle">本月上冰</h2><div class="stats"><button type="button" data-shortcut="ice"><strong id="minutes">0</strong><small>小时</small></button><button type="button" data-shortcut="ice"><strong id="sessions">0</strong><small>次上冰</small></button><button type="button" data-shortcut="expenses"><strong id="cost">¥0</strong><small>训练花费</small></button></div></section>
 <div class="bar spread"><h2>训练日志</h2><button class="primary" id="add" disabled>＋ 记一次上冰</button></div>
 <div id="records"></div>
 <section><h2>动作进度</h2><div class="card" id="skills"></div></section>
@@ -94,6 +95,7 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 <fieldset id="progressFields"><legend>动作阶段</legend><label>分类<select name="moveGroup"><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>未分类</option></select></label><label>动作<input name="name" list="moveNames" maxlength="80" required placeholder="如 燕式滑行"><datalist id="moveNames"></datalist></label><label>阶段<select name="level"><option>开始练习</option><option>第一次掌握</option><option>逐渐熟练</option><option>稳定完成</option><option>自定义</option></select></label><label id="customLevelLabel" hidden>自定义阶段<input name="customLevel" maxlength="80" disabled></label><label>添加照片或短视频 <small>每个最多 20 MB，每条最多 5 个</small><input name="media" type="file" accept="image/*,video/*" multiple></label><div id="detailAttached"></div></fieldset>
 <label>备注<textarea name="notes" rows="3" maxlength="5000"></textarea></label><p id="detailStatus" role="status"></p><button class="primary" id="detailSave">保存</button></form></dialog>
 <dialog id="mediaViewer" class="media-dialog" aria-labelledby="mediaTitle"><div class="bar spread"><h2 id="mediaTitle">照片与视频</h2><button id="closeMedia" type="button">关闭</button></div><div id="mediaBody" class="media-body"></div></dialog>
+<dialog id="profileEditor" aria-labelledby="profileTitle"><form id="profileForm"><div class="bar spread"><h2 id="profileTitle">个人资料</h2><button type="button" id="profileClose">关闭</button></div><img id="profilePreview" class="avatar-preview" alt="头像预览" hidden><label>头像<input type="file" name="avatar" accept="image/*"></label><button type="button" id="removeAvatar" hidden>移除头像</button><label>昵称<input name="nickname" maxlength="24" autocomplete="nickname" placeholder="选填"></label><p id="profileStatus" role="status"></p><button type="submit" class="primary" id="profileSave">保存资料</button></form></dialog>
 <script>
 const byId=id=>document.getElementById(id), form=byId('form'), editor=byId('editor');
 const MAX=20*1024*1024;
@@ -138,7 +140,7 @@ function moveList(value){return value.split('\n').map(line=>line.trim()).filter(
 function render(){
  for(const url of urls)URL.revokeObjectURL(url);urls=[];
  const today=dateToday(), first=records.at(-1)?.date;
- byId('journey').textContent=first?'从 '+first.replace(/^(\d+)-(\d+)-(\d+)$/,'$1 年 $2 月 $3 日')+' 首次上冰至今，已经 '+elapsedDays(first,today)+' 天。':'添加首条上冰记录后，将显示累计天数。';
+ byId('journey').textContent=(profile.nickname?profile.nickname+'，':'')+(first?'从 '+first.replace(/^(\d+)-(\d+)-(\d+)$/,'$1 年 $2 月 $3 日')+' 首次上冰至今，已经 '+elapsedDays(first,today)+' 天。':'添加首条上冰记录后，将显示累计天数。');
  const month=today.slice(0,7), current=records.filter(r=>r.date.startsWith(month));
  byId('monthTitle').textContent=month.replace('-',' 年 ')+' 月上冰';
  byId('minutes').textContent=toHours(totalMinutes(current));
@@ -147,9 +149,11 @@ function render(){
  const list=byId('records');list.replaceChildren();
  if(!records.length)list.append(make('p','暂无训练记录。点击「记一次上冰」添加。','card muted'));
  for(const r of records){
-  const card=make('article',undefined,'card'), top=make('div',undefined,'bar spread');
-  top.append(make('strong',r.date+(r.rink?' · '+r.rink:'')));
-  const edit=make('button','编辑');edit.onclick=()=>show(r);top.append(edit);
+  const card=make('article',undefined,'card training-card'), top=make('div',undefined,'bar spread');
+  const title=actionButton(r.date+(r.rink?' · '+r.rink:''),()=>show(r));
+  title.className='record-title';title.setAttribute('aria-label','编辑 '+title.textContent+' 的训练记录');
+  top.append(title);
+  card.onclick=event=>{if(!event.target.closest('button,a,input,video'))show(r);};
   card.append(top,make('p',r.kind+' · '+duration(r.minutes)+' · '+money(Math.round((r.cost+(r.coachFee??0)+(r.legacyFee??0))*100))+(r.kind==='教练课'&&r.coach?' · 教练 '+r.coach:'')+(paymentLabels[r.payment]?' · '+paymentLabels[r.payment]:''),'muted'));
   for(const [name,level] of moveList(r.moves)){card.append(make('span',name+' · '+level,'chip'));}
   if(r.notes)card.append(make('p',r.notes));
@@ -265,9 +269,9 @@ function renderExpenses(){
  const total=byId('expenseTotals'), list=byId('expenseList'), summary=make('div',undefined,'card');
  const months=rows.filter(r=>r.date.startsWith(month));
  const sum=items=>items.reduce((acc,r)=>acc+r.cents,0);
- summary.append(make('h2','本月 '+money(sum(months))),make('p','累计 '+money(sum(rows)),'muted'));
+ summary.append(make('h2','本月 '+money(sum(months))),make('p','累计 '+money(sum(rows))+' · 按类别','muted'));
  for(const category of feeCategories){
-  const subtotal=sum(months.filter(r=>r.category===category));
+  const subtotal=sum(rows.filter(r=>r.category===category));
   if(subtotal)summary.append(make('span',category+' '+money(subtotal),'chip'));
  }
  total.replaceChildren(summary);list.replaceChildren();
@@ -390,15 +394,17 @@ function renderCalendar(){
 }
 byId('prevMonth').onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);renderCalendar();};
 byId('nextMonth').onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);renderCalendar();};
-document.querySelectorAll('[data-page]').forEach(button=>button.onclick=()=>{
- byId('homeHeader').hidden=button.dataset.page!=='home';
+function goTo(page){
+ byId('homeHeader').hidden=page!=='home';
  window.scrollTo(0,0);byId('status').textContent='';
- for(const view of document.querySelectorAll('[data-view]'))view.hidden=view.id!==button.dataset.page;
+ for(const view of document.querySelectorAll('[data-view]'))view.hidden=view.id!==page;
  for(const tab of document.querySelectorAll('[data-page]')){
-  tab.classList.toggle('primary',tab===button);
-  if(tab===button)tab.setAttribute('aria-current','page');else tab.removeAttribute('aria-current');
+  tab.classList.toggle('primary',tab.dataset.page===page);
+  if(tab.dataset.page===page)tab.setAttribute('aria-current','page');else tab.removeAttribute('aria-current');
  }
-});
+}
+document.querySelectorAll('[data-page]').forEach(button=>button.onclick=()=>goTo(button.dataset.page));
+document.querySelectorAll('[data-shortcut]').forEach(button=>button.onclick=()=>goTo(button.dataset.shortcut));
 function updateCustomLevel(){
  const custom=detailType==='progress'&&detailForm.elements.level.value==='自定义';
  byId('customLevelLabel').hidden=!custom;detailForm.elements.customLevel.disabled=!custom;detailForm.elements.customLevel.required=custom;
@@ -454,6 +460,56 @@ detailForm.onsubmit=async event=>{
  finally{button.disabled=false;}
 };
 
+const profileForm=byId('profileForm'), profileEditor=byId('profileEditor'), profileButton=byId('profileButton');
+const profileKey='bingji-local-profile';
+let profile={nickname:'',avatar:''}, pendingAvatar='';
+try{
+ const stored=JSON.parse(localStorage.getItem(profileKey));
+ if(stored&&typeof stored.nickname==='string'&&typeof stored.avatar==='string')profile=stored;
+}catch{}
+function renderProfile(){
+ profileButton.replaceChildren();
+ if(profile.avatar){const img=make('img');img.alt='';img.src=profile.avatar;profileButton.append(img);}
+ else profileButton.textContent=Array.from(profile.nickname)[0]??'＋';
+}
+function previewAvatar(){
+ const image=byId('profilePreview');image.hidden=!pendingAvatar;byId('removeAvatar').hidden=!pendingAvatar;
+ if(pendingAvatar)image.src=pendingAvatar;else image.removeAttribute('src');
+}
+profileButton.onclick=()=>{
+ profileForm.reset();profileForm.elements.nickname.value=profile.nickname;pendingAvatar=profile.avatar;
+ previewAvatar();byId('profileStatus').textContent='';profileEditor.showModal();
+};
+byId('profileClose').onclick=()=>profileEditor.close();
+byId('removeAvatar').onclick=()=>{pendingAvatar='';profileForm.elements.avatar.value='';previewAvatar();};
+async function resizeAvatar(file){
+ if(!file.type.startsWith('image/')||file.size>20*1024*1024)throw Error('Invalid avatar');
+ const url=URL.createObjectURL(file);
+ try{
+  const image=make('img');image.src=url;await image.decode();
+  const size=Math.min(image.naturalWidth,image.naturalHeight);
+  const canvas=make('canvas');canvas.width=canvas.height=240;
+  canvas.getContext('2d').drawImage(image,(image.naturalWidth-size)/2,(image.naturalHeight-size)/2,size,size,0,0,240,240);
+  return canvas.toDataURL('image/webp',.86);
+ }finally{URL.revokeObjectURL(url);}
+}
+profileForm.elements.avatar.onchange=async event=>{
+ const file=event.target.files[0];if(!file)return;
+ const save=byId('profileSave'), remove=byId('removeAvatar');
+ save.disabled=remove.disabled=event.target.disabled=true;
+ byId('profileStatus').textContent='';
+ try{const avatar=await resizeAvatar(file);if(profileEditor.open){pendingAvatar=avatar;previewAvatar();}}
+ catch{byId('profileStatus').textContent='无法读取这张图片。请选择 20 MB 以内、浏览器支持的图片。';}
+ finally{save.disabled=remove.disabled=event.target.disabled=false;}
+};
+profileForm.onsubmit=event=>{
+ event.preventDefault();if(byId('profileSave').disabled)return;
+ const next={nickname:profileForm.elements.nickname.value.trim(),avatar:pendingAvatar};
+ try{localStorage.setItem(profileKey,JSON.stringify(next));}
+ catch{byId('profileStatus').textContent='无法保存资料，请检查浏览器的存储设置。';return;}
+ profile=next;profileEditor.close();renderProfile();render();say('已保存',true);
+};
+renderProfile();
 (async()=>{try{db=await openDB();await refresh();for(const id of ['add','addExpense','addProgress','import','export'])byId(id).disabled=false;}catch{say('当前浏览器无法使用本地存储，请用手机的常用浏览器打开。');}})();
 </script>
 </html>
