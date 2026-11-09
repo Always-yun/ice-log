@@ -72,6 +72,7 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 @media(max-width:600px){.training-fields>label{font-size:14px}.training-card.with-media .media-rail{width:clamp(57px,17vw,80px)}}
 .openable{cursor:pointer}.openable:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.openable:hover{border-color:#a7c4e3}.move-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center;margin-bottom:8px}.move-row input,.move-row select{margin:0}.move-row button{padding-inline:7px}.move-row .remove-move{background:transparent;color:#8b352b}.stage-row{border-radius:8px}.stage-row:hover{background:var(--paper)}
 @media(max-width:600px){html{zoom:.75}}
+.move-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.move-row .move-name{grid-column:1/-1}.move-row select{min-width:0;padding-inline:6px}
 </style>
 <main>
 <header id="homeHeader"><div class="home-heading"><div><p class="eyebrow">花样滑冰训练日志</p><h1>冰迹</h1></div><button type="button" class="avatar" id="profileButton" aria-label="编辑头像和昵称">＋</button></div><p class="muted">上冰、训练和花销，随手记在一起。</p></header>
@@ -99,7 +100,7 @@ footer{margin-top:25px;padding-top:16px;border-top:1px solid var(--line)}
 </main>
 <dialog id="editor"><form id="form"><div class="bar spread"><h2 id="editorTitle">记一次上冰</h2><button type="button" id="close">关闭</button></div>
 <div class="grid training-fields"><label>日期<input name="date" type="date" required></label><label>冰时（小时）<input name="hours" type="number" min=".01" max="24" step=".01" inputmode="decimal" placeholder="如 1.5" required></label><label>冰场<input name="rink" maxlength="80" placeholder="如 万象城冰场"></label><label>场地结算<select name="payment"><option value="single">单次付费</option><option value="month">月卡</option><option value="year">年卡</option><option value="other">其他冰场卡</option><option value="free">免场地费</option></select></label><label id="rinkFeeLabel">场地费（元）<input name="cost" type="number" min="0" max="1000000" step=".01" inputmode="decimal"></label><label>训练类型<select name="kind"><option>自主练习</option><option>教练课</option></select></label><label id="coachLabel" hidden>教练<input name="coach" maxlength="80" placeholder="选填" disabled></label><label id="legacyFeeLabel" hidden>历史训练费（元）<input name="legacyFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label><label id="coachFeeLabel" hidden>教练费（元）<input name="coachFee" type="number" min="0" max="1000000" step=".01" inputmode="decimal" disabled></label></div>
-<label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><label id="moveCategoryLabel">默认动作分类<select name="moveCategory"><option>未分类</option><option>跳跃</option><option>旋转</option><option>步法</option><option>整活</option><option>其他</option></select></label><fieldset><legend>练习动作及掌握程度</legend><div id="trainingMoves"></div><button type="button" id="addTrainingMove">＋ 添加动作</button></fieldset>
+<label class="toggle"><input name="includeMoves" type="checkbox" checked>将本次练习动作纳入动作掌握</label><fieldset><legend>练习动作及掌握程度</legend><div id="trainingMoves"></div><button type="button" id="addTrainingMove">＋ 添加动作</button></fieldset>
 
 <label>训练笔记 / 教练反馈<textarea name="notes" rows="3" maxlength="5000"></textarea></label>
 <div class="attachment-picker"><button type="button" data-pick-file="trainingFiles">添加照片或视频</button><small>每条最多 5 个，单个 20 MB</small><input id="trainingFiles" name="files" type="file" multiple accept="image/*,video/*" hidden></div><div id="attached"></div>
@@ -116,22 +117,35 @@ const byId=id=>document.getElementById(id), form=byId('form'), editor=byId('edit
 const MAX=20*1024*1024;
 const trainingLevels=['练习中','第一次掌握','逐渐熟练','稳定完成'];
 const trainingMoves=byId('trainingMoves');
-function addTrainingMove(name='',level='练习中'){
- const row=make('div',undefined,'move-row'), input=make('input'), select=make('select');
- input.placeholder='动作名称';input.value=name;input.maxLength=Math.max(100,name.length);input.setAttribute('aria-label','动作名称');
+let trainingDefaultCategory='未分类';
+function splitMoveLabel(label,fallback){
+ const prefix=label.match(/^(跳跃|旋转|步法|整活|其他|未分类)\s*[\/／]\s*(.+)$/);
+ return prefix?{name:prefix[2].trim(),category:prefix[1],explicit:true}:{name:label,category:fallback,explicit:false};
+}
+function addTrainingMove(label='',level='练习中'){
+ const original=splitMoveLabel(label,trainingDefaultCategory);
+ const row=make('div',undefined,'move-row'), input=make('input'), category=make('select'), select=make('select');
+ input.className='move-name';input.placeholder='动作名称';input.value=original.name;input.maxLength=Math.max(100,original.name.length);input.setAttribute('aria-label','动作名称');
+ category.setAttribute('aria-label','动作分类');
+ for(const value of moveCategories)category.append(make('option',value));
+ category.value=original.category;
  select.setAttribute('aria-label','掌握程度');
  for(const value of new Set([...trainingLevels,level]))select.append(make('option',value));
  select.value=level;
- const remove=actionButton('移除',()=>row.remove());remove.className='remove-move';row.append(input,select,remove);
- trainingMoves.append(row);
+ const remove=actionButton('移除',()=>row.remove());remove.className='remove-move';row.append(input,category,select,remove);
+ row.dataset.original=label;trainingMoves.append(row);
  return input;
 }
 byId('addTrainingMove').onclick=()=>addTrainingMove().focus();
 function readTrainingMoves(){
- return [...trainingMoves.children].map(row=>{
-  const [name,level]=row.children;
-  return name.value.trim()?[name.value.trim(),level.value].join('：'):'';
- }).filter(Boolean).join('\n');
+ return [...trainingMoves.children].flatMap(row=>{
+  const [input,category,level]=row.children, name=input.value.trim(), original=row.dataset.original;
+  if(!name)return [];
+  const previous=splitMoveLabel(original,trainingDefaultCategory);
+  const label=original&&name===previous.name&&category.value===previous.category?original:
+   category.value+' / '+name;
+  return [{original,label,level:level.value}];
+ });
 }
 document.querySelectorAll('[data-pick-file]').forEach(button=>{
  button.onclick=()=>byId(button.dataset.pickFile).click();
@@ -159,8 +173,6 @@ function updateCoach(){
 form.elements.kind.onchange=updateCoach;
 function updatePayment(){const single=form.elements.payment.value==='single';byId('rinkFeeLabel').hidden=!single;form.elements.cost.disabled=!single;}
 form.elements.payment.onchange=updatePayment;
-function updateMoveInclusion(){byId('moveCategoryLabel').hidden=!form.elements.includeMoves.checked;}
-form.elements.includeMoves.onchange=updateMoveInclusion;
 const dateToday=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 const make=(tag,value,className)=>{const node=document.createElement(tag); if(value!==undefined)node.textContent=value;if(className)node.className=className;return node};
 function openDB(){return new Promise((resolve,reject)=>{const request=indexedDB.open('ice-practice-journal',1);request.onupgradeneeded=()=>request.result.createObjectStore('logs',{keyPath:'id'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);request.onblocked=()=>reject(Error('数据库正在被其他页面使用'));});}
@@ -213,7 +225,7 @@ function show(record){editing=record?.id??null;attachments=[...(record?.files??[
  form.elements.hours.value=record?toHours(record.minutes):'';updateCoach();
  form.elements.payment.value=record?.payment??'single';updatePayment();
  form.elements.includeMoves.checked=record?.includeMoves!==false;
- form.elements.moveCategory.value=record?.moveCategory??'未分类';updateMoveInclusion();
+ trainingDefaultCategory=moveCategories.includes(record?.moveCategory)?record.moveCategory:'未分类';
  trainingMoves.replaceChildren();
  const moves=moveList(record?.moves??'');
  if(moves.length)for(const [name,level] of moves)addTrainingMove(name,level);
@@ -227,9 +239,20 @@ form.onsubmit=async event=>{event.preventDefault();const save=byId('save');if(sa
  const minutes=Math.round(Number(fields.hours)*60);
  if(!Number.isInteger(minutes)||minutes<1||minutes>1440){byId('formStatus').textContent='请填写 1 分钟到 24 小时之间的冰时。';return;}
  const {date,rink,kind,coach='',notes}=fields;
- const moves=readTrainingMoves();
- const record={id:editing||newId(),date,rink,kind,coach,moves,notes,minutes,payment:fields.payment,includeMoves:form.elements.includeMoves.checked,moveCategory:fields.moveCategory,cost:Number(fields.cost||0),coachFee:Number(fields.coachFee||0),legacyFee:Number(fields.legacyFee||0),updated:Date.now(),files:[...attachments]};
- await transact('readwrite',store=>store.put(record));editor.close();await refresh();say('已保存',true);
+ const entries=readTrainingMoves();
+ const moves=entries.map(move=>move.label+'：'+move.level).join('\n');
+ const remapped=new Map(entries.filter(move=>move.original&&move.original!==move.label).map(move=>[move.original,move.label]));
+ const record={id:editing||newId(),date,rink,kind,coach,moves,notes,minutes,payment:fields.payment,includeMoves:form.elements.includeMoves.checked,moveCategory:trainingDefaultCategory,cost:Number(fields.cost||0),coachFee:Number(fields.coachFee||0),legacyFee:Number(fields.legacyFee||0),updated:Date.now(),files:[...attachments]};
+ await transact('readwrite',store=>{
+  store.put(record);
+  if(!remapped.size)return;
+  const request=store.getAll();
+  request.onsuccess=()=>{
+   for(const stage of request.result)if(stage.sourceLogId===record.id&&remapped.has(stage.sourceMove)){
+    store.put({...stage,sourceMove:remapped.get(stage.sourceMove)});
+   }
+  };
+ });editor.close();await refresh();say('已保存',true);
  }catch{byId('formStatus').textContent='保存失败。请检查浏览器存储空间，或减少附件后重试。';}finally{save.disabled=false;}};
 function encode(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve({name:file.name,type:file.type,data:reader.result.split(',')[1]});reader.onerror=()=>reject(reader.error);reader.readAsDataURL(file);});}
 byId('export').onclick=async()=>{const button=byId('export');button.disabled=true;try{
@@ -390,11 +413,11 @@ function progressGroups(includeHidden=false){
   add(stage.name,category,stage);
  }
  for(const log of records)if(log.includeMoves!==false)for(const [label,level] of new Map(sourceMoves.get(log.id))){
-  const prefix=label.match(/^(跳跃|旋转|步法|整活|其他)\s*[\/／]\s*(.+)$/);
-  const name=prefix?prefix[2].trim():label;
-  const defaultCategory=moveCategories.includes(log.moveCategory)?log.moveCategory:'未分类';
-  const category=prefix?.[1]??(defaultCategory==='未分类'?categorized.get(name)??defaultCategory:defaultCategory);
+  const fallback=moveCategories.includes(log.moveCategory)?log.moveCategory:'未分类';
+  const move=splitMoveLabel(label,fallback), name=move.name;
   const saved=linked.get(sourceKey(log.id,label));
+  const inferred=!move.explicit&&move.category==='未分类'?categorized.get(name)??move.category:move.category;
+  const category=moveCategories.includes(saved?.categoryOverride)?saved.categoryOverride:inferred;
   if(!includeHidden&&saved?.hiddenFromProgress===true)continue;
   add(name,category,{...saved,date:log.date,updated:saved?.updated??log.updated,level:saved?.level??level,log,sourceMove:label});
  }
@@ -456,8 +479,8 @@ async function deleteProgressCard(name,category,stages,button){
     if(!stage.log){store.put({...stage,files:[],notes:'',hiddenFromProgress:true});continue;}
     const sourceLogId=stage.log.id, sourceMove=stage.sourceMove;
     store.put({
-     id:stage.id||'linked:'+JSON.stringify([sourceLogId,sourceMove]),
-     type:'progress',name,moveGroup:category,sourceLogId,sourceMove,
+     id:stage.id||newId(),
+     type:'progress',name,moveGroup:category,categoryOverride:stage.categoryOverride,sourceLogId,sourceMove,
      date:stage.date,updated:Date.now(),level:stage.level,notes:'',files:[],hiddenFromProgress:true
     });
    }
@@ -524,11 +547,11 @@ function listDetailFiles(){
 }
 function showDetail(type,record,name='',category='跳跃'){
  detailType=type;detailId=record?.id??null;detailFiles=[...(record?.files??[])];detailForm.reset();
- detailSource=record?.log?{sourceLogId:record.sourceLogId,sourceMove:record.sourceMove,name:record.name,moveGroup:record.moveGroup,date:record.date}:null;
+ detailSource=record?.log?{sourceLogId:record.sourceLogId,sourceMove:record.sourceMove,name:record.name,originalCategory:record.moveGroup,categoryOverride:record.categoryOverride,date:record.date}:null;
  const f=detailForm.elements, expense=type==='expense';
  byId('expenseFields').disabled=byId('expenseFields').hidden=!expense;
  byId('progressFields').disabled=byId('progressFields').hidden=expense;
- f.date.readOnly=!!detailSource;f.name.readOnly=!!detailSource;f.moveGroup.disabled=!!detailSource;
+ f.date.readOnly=!!detailSource;f.name.readOnly=!!detailSource;
  f.date.value=record?.date??dateToday();f.notes.value=record?.notes??'';
  if(expense){f.category.value=record?.category??'场地费';f.amount.value=record?record.cents/100:'';}
  else{
@@ -551,11 +574,14 @@ detailForm.onsubmit=async event=>{
  event.preventDefault();
  const button=byId('detailSave');if(button.disabled)return;
  const fields=Object.fromEntries(new FormData(detailForm));
- const record={id:detailId||(detailSource?'linked:'+JSON.stringify([detailSource.sourceLogId,detailSource.sourceMove]):newId()),type:detailType,date:fields.date,notes:fields.notes,updated:Date.now(),files:[]};
+ const record={id:detailId||newId(),type:detailType,date:fields.date,notes:fields.notes,updated:Date.now(),files:[]};
  if(detailType==='expense'){record.category=fields.category;record.cents=Math.round(Number(fields.amount)*100);}
  else{
   record.name=fields.name.trim();record.moveGroup=fields.moveGroup;
-  if(detailSource)Object.assign(record,detailSource);
+  if(detailSource){
+   const {sourceLogId,sourceMove,name,date,originalCategory,categoryOverride}=detailSource;
+   Object.assign(record,{sourceLogId,sourceMove,name,date,categoryOverride:fields.moveGroup!==originalCategory?fields.moveGroup:categoryOverride});
+  }
   record.level=(fields.customLevel??fields.level).trim();record.files=[...detailFiles];
   if(!record.name||!record.level){byId('detailStatus').textContent='请填写动作名称和阶段。';return;}
  }
